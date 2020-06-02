@@ -45,12 +45,10 @@ class Project:
         self.costs.append(cost)
         return self  # Daisy Chaining!
 
-    def npw():
+    def npw(self):
         npw = 0
-        for r in self.revenues:
-            npw += r.to_pv()
-        for c in self.costs:
-            npw -= c.to_pv()
+        npw += sum([r.to_pv().amount for r in self.revenues])
+        npw -= sum([c.to_pv().amount for c in self.costs])
         return npw
 
     def describe():

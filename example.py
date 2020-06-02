@@ -2,10 +2,13 @@ from PyPWA import Project
 from PyPWA import SinglePaymentFactory as sp
 # from PyPWA import UniformSeriesFactory as us
 
-p1 = Project(interest=0.12)
-
+p1 = Project()
 i = 0.12
-c = sp.Future(100, i, 4)
-print("\nPresent Value for Future Cashflow of $100: $%d\n" % c.to_pv().amount)
-print(c.to_fv(3))
+
+p1.add_cost(      sp.Present(1200, i))    \
+    .add_revenue( sp.Future(100,   i, 1)) \
+    .add_revenue( sp.Future(200,   i, 3)) \
+    .add_revenue( sp.Future(1200,  i, 5))
+
+print("Net Present Worth: $%.2f" % p1.npw())
 
