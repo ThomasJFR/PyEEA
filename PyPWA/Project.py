@@ -16,7 +16,7 @@ class Project:
             agg.add_cost(c1)
         for c2 in them.costs:
             agg.add_cost(c2)
-        
+
         return agg  # The aggregation of Projects
 
     def __lt__(self, them):
