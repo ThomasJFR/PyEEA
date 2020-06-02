@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
 class Cashflow(ABC):
-    def __init__(self, amount):
+    def __init__(self, amount, interest):
         self.amount = amount
+        self.i = interest
 
     @abstractmethod
     def to_pv(self):
