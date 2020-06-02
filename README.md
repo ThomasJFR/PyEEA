@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 # PyPWA  <img align='right' src='./assets/logo.ico' alt=''/>
+=======
+# PyEEA  <image align='right' src='./assets/logo.png alt=''/>
+>>>>>>> Stashed changes
 
 A Python3 library for performing engineering economics analysis. Styled using [Black](https://github.com/psf/black)
 
@@ -16,8 +20,8 @@ For example, a simple project may have cashflows that look like this
 
 
 ``` Python
-from PyPWA import Project
-from PyPWA import SinglePaymentFactory as sp
+from PyEEA import Project
+from PyEEA import SinglePaymentFactory as sp
 
 my_project = Project
 my_project \
@@ -29,3 +33,6 @@ print("Net Present Worth of Project: $%.2f" % my_project.npw())
 # Output: Net Present Worth of Project: $-287.45
 
 
+## Pronunciation
+
+Proncounced ["Paella"](https://howdoyousaythatword.com/word/paella-spanish/)
