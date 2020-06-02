@@ -1,4 +1,4 @@
-# PyPWA
+# PyPWA  <image align='right' src='./assets/logo.png alt=''/>
 
 A Python3 library for performing engineering economics analysis. Styled using [Black](https://github.com/psf/black)
 
