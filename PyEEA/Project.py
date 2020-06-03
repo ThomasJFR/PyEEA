@@ -17,20 +17,15 @@ class Project:
         self.name = name
         self.interest = interest
 
-        self.revenues = []
-        self.costs = []
+        self.cashflows = []
 
     def __add__(self, them):
         agg = Project()
-        for r1 in self.revenues:
-            agg.add_revenue(r1)
-        for r2 in them.revenues:
-            agg.add_revenue(r2)
-        for c1 in self.costs:
-            agg.add_cost(c1)
-        for c2 in them.costs:
-            agg.add_cost(c2)
-
+        for cf1 in self.cashflows:
+            agg.add_cashflow(cf1)
+        for cf2 in them.cashflows:
+            agg.add_cashflow(cf2)
+        
         return agg  # The aggregation of Projects
 
     def __lt__(self, them):
@@ -51,19 +46,18 @@ class Project:
     def set_interest(self, interest):
         self.interest = interest
 
-    def add_revenue(self, revenue):
-        self.revenues.append(revenue)
+    def add_cashflow(self, cf):
+        self.cashflows.append(cf)
         return self  # Daisy Chaining!
 
-    def add_cost(self, cost):
-        self.costs.append(cost)
-        return self  # Daisy Chaining!
+    def revenues(self):
+        return [cf for cf in self.cashflows if cf.amount > 0]
+
+    def costs(self):
+        return [cf for cf in self.cashflows if cf.amount < 0]
 
     def npw(self):
-        npw = 0
-        npw += sum([r.to_pv(self.interest).amount for r in self.revenues])
-        npw -= sum([c.to_pv(self.interest).amount for c in self.costs])
-        return npw
+        return sum([cf.to_pv(self.interest).amount for cf in self.cashflows])
 
     def describe():
         pass

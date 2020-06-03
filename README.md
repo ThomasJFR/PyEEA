@@ -21,11 +21,12 @@ from PyEEA import SinglePaymentFactory as sp
 
 my_project = Project(interest=0.12)
 
-my_project                             \
-    .add_cost(   sp.Present(1200))     \
-    .add_revenue( sp.Future(100,  1))  \
-    .add_revenue( sp.Future(200,  3))  \
-    .add_revenue( sp.Future(1200, 5))
+my_project                               \
+    .add_cashflow(sp.Present(-1200))     \
+    .add_cashflow( sp.Future( 100,  1))  \
+    .add_cashflow( sp.Future( 200,  3))  \
+    .add_cashflow( sp.Future( 1200, 5))
+
 print("Net Present Worth of Project: $%.2f" % my_project.npw())
 # Output: Net Present Worth of Project: $-287.45
 
