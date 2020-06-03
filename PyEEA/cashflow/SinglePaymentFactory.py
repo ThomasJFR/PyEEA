@@ -2,6 +2,11 @@ from .Cashflow import Cashflow
 
 
 class Present(Cashflow):
+    """
+    Author: Thomas Richmond
+    Description: Represents an amount of cash now.
+    """
+
     def __init__(self, amount):
         super().__init__(amount)
 
@@ -16,6 +21,12 @@ class Present(Cashflow):
 
 
 class Future(Cashflow):
+    """
+    Author: Thomas Richmond
+    Description: Represents an amount of cash in the future.
+    Parameter: n [number] - The period at which the amount is received.
+    """
+
     def __init__(self, amount, n):
         super().__init__(amount)
         self.n = n

@@ -1,4 +1,18 @@
 class Project:
+    """
+    Author: Thomas Richmond
+    Description: A collection of revenues and costs for a project.
+                 Projects serve to (i) encapsulate a set of costs,
+                 (ii) enable more advanced project worth analysis, and
+                 (iii) define a common interest rate for all cash flows.
+    Parameters: name [string] - A human-readable name used to distinguish
+                                the project from others. This is especially
+                                important when exporting projects to other 
+                                forms, e.g. charts or spreadsheets.
+                interest [number] - The interest rate to apply to all
+                                    cash flows within the project.
+    """
+
     def __init__(self, name="generator", interest=0.12):
         self.name = name
         self.interest = interest
