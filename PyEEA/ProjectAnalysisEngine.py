@@ -7,5 +7,5 @@ def fwa(projects, n):
     pass  # sort([p.to_fv(n) for p in projects])
 
 
-def awa(projects):
+def eaca(projects):
     pass  # TODO Learn this
