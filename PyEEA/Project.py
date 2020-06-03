@@ -25,7 +25,7 @@ class Project:
             agg.add_cashflow(cf1)
         for cf2 in them.cashflows:
             agg.add_cashflow(cf2)
-        
+
         return agg  # The aggregation of Projects
 
     def __lt__(self, them):
@@ -46,9 +46,29 @@ class Project:
     def set_interest(self, interest):
         self.interest = interest
 
+    """
+    Author: Thomas Richmond
+    Description: Adds a single cashflow to the project cashflow list.
+    Parameters: cf [Cashflow] - A cashflow object
+    Returns: The instance of Project, allowing for daisy-chaining
+    """
+
     def add_cashflow(self, cf):
         self.cashflows.append(cf)
         return self  # Daisy Chaining!
+
+    """
+    Author: Thomas Richmond
+    Description: Analogous in purpose to add_cashflow() above, but provides an alternate syntax
+    Parameters: cfs [iterable(Cashflow)] - An iterable of cashflows which are added to the list
+                                           of project cashflows.
+    Returns: The instance of Project, allowing for daisy-chaining
+    """
+
+    def add_cashflows(self, cfs):
+        for cf in cfs:
+            self.add_cashflow(cf)
+        return self
 
     def revenues(self):
         return [cf for cf in self.cashflows if cf.amount > 0]

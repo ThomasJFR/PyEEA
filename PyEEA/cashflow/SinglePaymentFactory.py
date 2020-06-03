@@ -1,5 +1,6 @@
 from .Cashflow import Cashflow, PaymentScheme as ps
 
+
 class Present(Cashflow):
     """
     Author: Thomas Richmond

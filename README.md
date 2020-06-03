@@ -29,8 +29,18 @@ my_project                               \
 
 print("Net Present Worth of Project: $%.2f" % my_project.npw())
 # Output: Net Present Worth of Project: $-287.45
-
 ```
+
+An iterable syntax is also supported when supplying cashflows to a project
+``` Python
+my_project.add_cashflows([
+    sp.Present(-1200),
+     sp.Future( 100, 1),
+     sp.Future( 300, 3),
+     sp.Future( 1200, 5)
+])
+```
+
 
 ## Pronunciation
 

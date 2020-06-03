@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
+
 class PaymentScheme(Enum):
-    ARREAR = 'payment in arrear'
-    DUE = 'payment in due'
+    ARREAR = "payment in arrear"
+    DUE = "payment in due"
+
 
 class Cashflow(ABC):
     """
@@ -15,6 +17,7 @@ class Cashflow(ABC):
                                   characteristic interest factor of the cash flow.
                                   (e.g. < amount * (P|F, i, n) >)
     """
+
     def __init__(self, amount):
         self.amount = amount
 
