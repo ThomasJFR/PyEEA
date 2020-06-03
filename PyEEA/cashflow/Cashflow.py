@@ -1,4 +1,9 @@
 from abc import ABC, abstractmethod
+from enum import Enum
+
+class PaymentScheme(Enum):
+    ARREAR = 'payment in arrear'
+    DUE = 'payment in due'
 
 class Cashflow(ABC):
     """
@@ -14,7 +19,7 @@ class Cashflow(ABC):
         self.amount = amount
 
     @abstractmethod
-    def to_pv(self):
+    def to_pv(self, i):
         pass
 
     @abstractmethod
@@ -22,5 +27,5 @@ class Cashflow(ABC):
         pass
 
     @abstractmethod
-    def to_annuity(self, i, n):
+    def to_annuity(self, i, n, scheme):
         pass

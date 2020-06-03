@@ -1,5 +1,4 @@
-from .Cashflow import Cashflow
-
+from .Cashflow import Cashflow, PaymentScheme as ps
 
 class Present(Cashflow):
     """
@@ -16,7 +15,7 @@ class Present(Cashflow):
     def to_fv(self, i, n):
         return Future(self.amount * (1 + i) ** n, i)
 
-    def to_annuity(self, i, n):
+    def to_annuity(self, i, n, scheme=ps.ARREAR):
         pass
 
 
@@ -40,5 +39,5 @@ class Future(Cashflow):
         else:
             return Future(self.to_pv().amount, i, n)
 
-    def to_annuity(self, n):
+    def to_annuity(self, n, scheme=ps.ARREAR):
         pass  # TODO
