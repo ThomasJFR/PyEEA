@@ -1,4 +1,4 @@
-# PyEEA  <image align='right' src='./assets/logo.png alt=''/>
+# PyEEA  <img align='right' src='./assets/logo.ico' alt=''/>
 
 A Python3 library for performing engineering economics analysis. Styled using [Black](https://github.com/psf/black)
 
@@ -27,7 +27,7 @@ my_project \
     .add_revenue( sp.Future(1200,  i, 5))
 print("Net Present Worth of Project: $%.2f" % my_project.npw())
 # Output: Net Present Worth of Project: $-287.45
-
+```
 
 ## Pronunciation
 
