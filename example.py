@@ -1,14 +1,14 @@
-from PyPWA import Project
-from PyPWA import SinglePaymentFactory as sp
-# from PyPWA import UniformSeriesFactory as us
+from PyEEA import Project
+from PyEEA import SinglePaymentFactory as sp
+# from PyEEA import UniformSeriesFactory as us
 
-p1 = Project()
-i = 0.12
+my_project = Project(interest=0.12)
 
-p1.add_cost(      sp.Present(1200, i))    \
-    .add_revenue( sp.Future(100,   i, 1)) \
-    .add_revenue( sp.Future(200,   i, 3)) \
-    .add_revenue( sp.Future(1200,  i, 5))
+my_project                            \
+    .add_cost(   sp.Present(1200))    \
+    .add_revenue( sp.Future(100, 1))  \
+    .add_revenue( sp.Future(200, 3))  \
+    .add_revenue( sp.Future(1200, 5))
 
-print("Net Present Worth: $%.2f" % p1.npw())
+print("Net Present Worth: $%.2f" % my_project.npw())
 

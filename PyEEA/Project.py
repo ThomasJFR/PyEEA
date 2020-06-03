@@ -47,8 +47,8 @@ class Project:
 
     def npw(self):
         npw = 0
-        npw += sum([r.to_pv().amount for r in self.revenues])
-        npw -= sum([c.to_pv().amount for c in self.costs])
+        npw += sum([r.to_pv(self.interest).amount for r in self.revenues])
+        npw -= sum([c.to_pv(self.interest).amount for c in self.costs])
         return npw
 
     def describe():
