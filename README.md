@@ -27,7 +27,7 @@ my_project \
     .add_revenue( sp.Future(1200,  i, 5))
 print("Net Present Worth of Project: $%.2f" % my_project.npw())
 # Output: Net Present Worth of Project: $-287.45
-
+```
 
 ## Pronunciation
 
