@@ -6,20 +6,20 @@ Snippet of a Python Cashflow object template:
 from .Cashflow import Cashflow
 
 def MyCashflow(Cashflow):
-    def __init__(self, amount, interest, other_param):
-        super().__init__(amount, interest)
+    def __init__(self, amount, other_param):
+        super().__init__(amount)
         # Other logic, e.g.
         self.foo = other_param
 
-    def to_pv(self):
+    def to_pv(self, i):
         pass
 
-    def to_fv(self, n):
+    def to_fv(self, i, n):
         pass
 
-    def to_an(self, n):
+    def to_an(self, i, n):
         pass
 
-    # Other methods....
+    # Other class methods....
 
 ```
