@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-# PyPWA  <img align='right' src='./assets/logo.ico' alt=''/>
-=======
 # PyEEA  <image align='right' src='./assets/logo.png alt=''/>
->>>>>>> Stashed changes
 
 A Python3 library for performing engineering economics analysis. Styled using [Black](https://github.com/psf/black)
 
