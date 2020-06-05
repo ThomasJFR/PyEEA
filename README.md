@@ -1,4 +1,5 @@
-# PyEEA  <img align='right' src='./assets/logo.ico' alt=''/>
+# PyEEA - A Python Engineering Economics Analysis Library
+<img align='right' src='./assets/logo.ico' alt=''/>
 
 A Python3 library for performing engineering economics analysis. Styled using [Black](https://github.com/psf/black)
 
