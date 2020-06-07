@@ -25,8 +25,10 @@ class Present(Cashflow):
     def to_fv(self, i, n):
         return Future(self.amount * (1 + i) ** n, i)
 
-    def to_av(self, i, n, scheme=ps.ARREAR):
-        return us.Annuity(self.amount * ((i * (1+i)**n) / ((1+i)**n) - 1), n)
+    def to_av(self, i, d, scheme=ps.ARREAR):
+        d = us.Annuity.parse_d(d)
+        D = d[1] - d[0] + 1
+        return us.Annuity(self.amount * ((i * (1+i)**D) / ((1+i)**D) - 1), d)
 
 
 class Future(Cashflow):
@@ -40,6 +42,18 @@ class Future(Cashflow):
         super().__init__(amount)
         self.n = n
 
+    def __repr__(self):
+        """
+        Author: Thomas Richmond
+        Purpose: Displays a cash amount in a pretty format.
+        Example: << Future:  $12,900.00 @ n=10 >>
+        """
+        return "<< {}: {}${:,.2f} @ n={} >>".format(
+            self.get_name(),
+            '-' if self.amount < 0 else ' ',
+            abs(self.amount),
+            self.n)
+
     def to_pv(self, i):
         return Present(self.amount * (1 + i) ** (-self.n))
 
@@ -49,5 +63,8 @@ class Future(Cashflow):
         else:
             return Future(self.to_pv().amount, i, n)
 
-    def to_av(self, i, n, scheme=ps.ARREAR):
-        return us.Annuity(self.amount * i / ((1 + i)**n - 1), n)
+    def to_av(self, i, d, scheme=ps.ARREAR):
+        d = Annuity.parse_d(d)
+        D = d[1] - d[0] + 1
+        return us.Annuity(self.amount * i / ((1 + i)**D - 1), d)
+    

@@ -22,6 +22,13 @@ class Cashflow(ABC):
         self.amount = amount
 
     def __repr__(self):
+        """
+        Author: Thomas Richmond
+        Purpose: Displays a cash amount in a pretty format.
+                 To display any additional info in children,
+                 overwrite this function 
+        Example: << Present: -$12,600,120.12>>
+        """
         return "<< {}: {}${:,.2f} >>".format(
             self.get_name(),
             '-' if self.amount < 0 else ' ',
@@ -40,5 +47,6 @@ class Cashflow(ABC):
         pass
 
     @abstractmethod
-    def to_av(self, i, n, scheme):
+    def to_av(self, i, d, scheme):
         pass
+
