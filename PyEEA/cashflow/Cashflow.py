@@ -21,6 +21,16 @@ class Cashflow(ABC):
     def __init__(self, amount):
         self.amount = amount
 
+    def __repr__(self):
+        return "<< {}: {}${:,.2f} >>".format(
+            self.get_name(),
+            '-' if self.amount < 0 else ' ',
+            abs(self.amount))
+
+    @classmethod
+    def get_name(cls):
+        return cls.__name__
+
     @abstractmethod
     def to_pv(self, i):
         pass
@@ -30,5 +40,5 @@ class Cashflow(ABC):
         pass
 
     @abstractmethod
-    def to_annuity(self, i, n, scheme):
+    def to_av(self, i, n, scheme):
         pass
