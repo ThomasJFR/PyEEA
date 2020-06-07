@@ -1,19 +1,17 @@
-def psc(x, rsize, rcost, tsize):
+def psc(x, size_ratio, ref_cost):
     """
     Returns: Cost of a power-sizing model estimate as per the formula:
     
-                  tsize
-        tcost = ( ----- )^x * rcost
-                  rsize
-    """
-    return rcost * (tsize / rsize) ** x
+        tcost = ( size_ratio)^x * ref_cost
 
-def pss(x, rcost, rsize, tcost):
+    """
+    return ref_cost * size_ratio ** x
+
+def pss(x, cost_ratio, ref_size):
     """
     Returns: Size of a power-sizing model estimate as per the formula:
-    
-                  tcost
-        tsize = ( ----- )^-x * rsize
-                  rcost
+
+        tsize = (cost_ratio)^-x * ref_size
+
     """
-    return rsize * (tcost / rcost) ** -x
+    return ref_size* (cost_ratio) ** -x

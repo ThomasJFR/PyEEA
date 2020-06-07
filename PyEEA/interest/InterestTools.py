@@ -8,7 +8,7 @@ def effective_interest(r, m):
     """
     return (1 + r/m)**m - 1
 
-def equivalent_interest(i, p, c):
+def equivalent_interest(i, c, p):
     """
     Author: Thomas Richmond
     Purpose: Convert a periodically compounded interest rate to an
@@ -18,4 +18,4 @@ def equivalent_interest(i, p, c):
                 c [integer] - Compounding periods per year
                 p [integer] - Payment periods per year
     """
-    pass #TODO Implement me!
+    return (1 + i) ** (c / p) - 1
