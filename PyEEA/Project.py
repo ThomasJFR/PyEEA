@@ -1,3 +1,5 @@
+from .cashflow import SinglePaymentFactory as sp
+
 class Project:
     """
     Author: Thomas Richmond
@@ -19,14 +21,21 @@ class Project:
 
         self.cashflows = []
 
-    def __add__(self, them):
+    def __add__(self, other):
         agg = Project()
         for cf1 in self.cashflows:
             agg.add_cashflow(cf1)
-        for cf2 in them.cashflows:
+        for cf2 in other.cashflows:
             agg.add_cashflow(cf2)
 
         return agg  # The aggregation of Projects
+
+    def __radd__(self, other):
+        if other == 0:  # Happens when sum() begins
+            return self
+        else:
+            return self.__add__(other)
+        
 
     def __lt__(self, them):
         return self.npw() < them.npw()
@@ -76,8 +85,27 @@ class Project:
     def costs(self):
         return [cf for cf in self.cashflows if cf.amount < 0]
 
-    def npw(self):
-        return sum([cf.to_pv(self.interest).amount for cf in self.cashflows])
+    #################################
+    ### PROJECT VALUATION FUNCTIONS
+    ###
+
+    def npw(self, i=None):
+        if self.interest == None and i == None:
+            raise ValueError('No interest provided for npw calculations.\
+                              \nDid you mean to use set_interest(i)?')
+        else:
+            return sum([cf.to_pv(self.interest) for cf in self.cashflows])
+
+    def eucf(self, n=None):
+        if n == None:
+            raise NotImplementedError
+        return self.npw().to_av(self.interest, n)
+
+    def irr(self):
+        pass  # solve for NPW = 0
+
+    def mirr(self):
+        pass
 
     def describe():
         pass
