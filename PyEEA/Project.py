@@ -142,8 +142,21 @@ class Project:
         if self.interest == None and i == None:
             raise ValueError('No interest provided for npw calculations.\
                               \nDid you mean to use set_interest(i)?')
-        else:
-            return sum([cf.to_pv(i or self.interest) for cf in self.cashflows])
+        
+        return sum([cf.to_pv(i or self.interest) for cf in self.cashflows])
+
+    def bcr(self, i=None):
+        if self.interest == None and i == None:
+            raise ValueError('No interest provided for bcr calculations.\
+                              \nDid you mean to use set_interest(i)?')
+
+        pvb = sum([r.to_pv(i or self.interest) for r in self.revenues()]) or sp.Present(0)
+        pvc = sum([c.to_pv(i or self.interest) for c in self.costs()]) or sp.Present(0)
+        
+        if pvc == 0:
+            raise ArithmeticError("No costs in project; B/C is infinite!")
+
+        return abs(pvb.amount / pvc.amount)
 
     def eucf(self, n=None):
         if n == None:
