@@ -143,7 +143,7 @@ class Project:
             raise ValueError('No interest provided for npw calculations.\
                               \nDid you mean to use set_interest(i)?')
         else:
-            return sum([cf.to_pv(self.interest) for cf in self.cashflows])
+            return sum([cf.to_pv(i or self.interest) for cf in self.cashflows])
 
     def eucf(self, n=None):
         if n == None:
@@ -151,7 +151,8 @@ class Project:
         return self.npw().to_av(self.interest, n)
 
     def irr(self):
-        pass  # solve for NPW = 0
+        # WARNING: This only gets one value of IRR, but there could be more than one...
+        return fsolve(lambda i: self.npw(i).amount, self.interest)[0]
 
     def mirr(self):
         ncfs = self.get_ncfs()
@@ -159,7 +160,7 @@ class Project:
         fvb = sum([ncf.to_fv(self.interest, self.duration) for ncf in ncfs if ncf.amount > 0]) or sp.Future(0, self.duration)
         pvc = sum([ncf.to_pv(self.interest) for ncf in ncfs if ncf.amount < 0]) or sp.Present(0)
         
-        return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self.interest)
+        return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self.interest)[0]
 
     def describe():
         pass
