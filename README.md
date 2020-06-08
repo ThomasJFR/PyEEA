@@ -54,11 +54,11 @@ sp.Present( 1000)  # << Present:  $1000 >>
 sp.Future( -1000, 3)  # << Future:  -$1000 @ n=3 >>
 
 from PyEEA import UniformSeriesFactory as us
-us.Annuity(   1000, 5)              # << Annuity: $1000 for d=[0, 5] >>
-us.Gradient(  1000, [4],     100)   # << Gradient: $1000 with G=$100 for d=[0, 4] >>
-us.Geometric( 1000, [1, 10], 0.04)  # << Geometric: $1000 with g=4% for d=[1, 10] >>
-us.Perpetuity(...)
-us.GeoPerpetuity(...)
+us.Annuity(       1000, 5)              # $1000('A', [0, 5])
+us.Gradient(      1000, [4],     100)   # $1000('G', [0, 4], 100)
+us.Geometric(     1000, [1, 10], 0.04)  # $1000('g', [1, 10], 4%)
+us.Perpetuity(    100)			# $100('A', 'inf')
+us.GeoPerpetuity( 100, 0.05)		# $100('g', 'inf', 5%)
 ```
 
 ### Project Valuation
