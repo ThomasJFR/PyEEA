@@ -9,6 +9,8 @@ Developed by Thomas Richmond and MArkos Frazzer.
 
 ## Documentation
 
+### Project Modelling
+
 The intent of this library is to provide a clear illustration of cashflows within a project. 
 The library uses daisy-chaining syntax to accomplish this in a line-by-line fashion,
 similar to a typical spreadsheet.
@@ -42,6 +44,24 @@ my_project.add_cashflows([
 ])
 ```
 
+### Cashflow Models
+
+Several cashflow models are supported, as follows:
+
+``` Python
+from PyEEA import SinglePaymentFactory as sp
+sp.Present( 1000)  # << Present:  $1000 >>
+sp.Future( -1000, 3)  # << Future:  -$1000 @ n=3 >>
+
+from PyEEA import UniformSeriesFactory as us
+us.Annuity(1000, [1, 10])  # << Annuity: $1000 for d=[1, 10] >>
+us.Gradient(1000, [5, 10], 100) # << Gradient: $1000 with G= $100 for d=[5, 10]>>
+
+# TODO:
+us.Geometric(...)
+us.Perpetuity(...)
+us.GeoPerpetuity(...)
+```
 
 ## Pronunciation
 
