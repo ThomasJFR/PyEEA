@@ -23,6 +23,26 @@ class Project:
         self.cashflows = []
         self.periods = 0
 
+    def __getitem__(self, val):
+        if type(val) == int:
+            ns = (val,)  # Get the cashflows in a period as an array
+        elif type(val) == tuple:
+            ns = val  # Get the cashflows of multiple periods as a 2D array
+        elif type(val) == slice:
+            start = val.start or 0
+            stop  = (val.stop + 1) if val.stop else self.periods
+            step  = val.step or 1
+            ns = range(start, stop, step)
+                
+        match_period = lambda cf, n: any([isinstance(cf, sp.Present) and n == 0,
+                                          isinstance(cf, sp.Future) and cf.n == n,
+                                          isinstance(cf, us.Annuity) and cf.n in range(cf.d[0], cf.d[1] + 1)])
+        cfs = []
+        for n in ns:
+            cfs.append([cf for cf in self.cashflows if match_period(cf, n)])
+            
+        return cfs[0] if len(cfs) == 1 else cfs
+
     def __add__(self, other):
         agg = Project()
         for cf1 in self.cashflows:
@@ -118,12 +138,8 @@ class Project:
         Purpose: Gets the net cashflow for every period of the project.
         Returns: An array of net cashflows throughout the whole project
         """
-        match_period = lambda cf, n: any([isinstance(cf, sp.Present) and n == 0,
-                                          isinstance(cf, sp.Future) and cf.n == n,
-                                          isinstance(cf, us.Annuity) and cf.n in range(cf.d[0], cf.d[1] + 1)])
         ncfs = []
-        for n in range(self.duration + 1):
-            cfs = [cf for cf in self.cashflows if match_period(cf, n)]
+        for cfs in self[:]:
             if len(cfs) == 0:
                 ncfs.append(sp.Present(0) if n == 0 else sp.Future(0, n))
                 continue
