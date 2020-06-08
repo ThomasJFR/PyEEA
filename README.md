@@ -68,6 +68,7 @@ Once a project has been defined with a variety of cashflows, we can valuate the 
 ``` Python
 my_project.ncfs()  # Net Cashflows for Every Period
 my_project.npw()   # Net Present Worth
+my_project.bcr()   # Benefit-to-Cost Ratio
 my_project.eucf()  # Equivalent Uniform Cashflow
 my_project.irr()   # Internal Rate of Return
 my_project.mirr()  # Modified Internal Rate of Return
