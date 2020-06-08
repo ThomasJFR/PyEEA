@@ -57,7 +57,7 @@ class Annuity(Cashflow):
 
 
     def to_pv(self, i):
-        pv = self.amount * ((1 + i)**self.dn - 1) / (i * (1+i)**self.dn)
+        pv = self.amount * ((1 + i)**self.D - 1) / (i * (1+i)**self.D)
 
         if self.d[0] == 1:  # PV is correct
             return sp.Present(pv)
@@ -66,9 +66,12 @@ class Annuity(Cashflow):
             return sp.Future(pv, self.d[0]).to_pv(i)
 
     def to_fv(self, i, n):
-        if self.d[0] == 1:  # Annuity is ordinary; use standard formulas
-            fv = self.amount * ((1 + i)**n - 1) / i
-            return sp.Future(fv, n)
+        if self.d[0] == 1:  # Use standard formulas
+            if self.d[1] == n:
+                fv = self.amount * ((1 + i)**n - 1) / i
+                return sp.Future(fv, n)
+            else:
+                return self.to_pv(i).to_fv(i, n)
         else:  # Annuity is not ordinary; convert to "Future Present Value", -
                # that is, the future value at the starting period of the annuity -
                # then to Present Value, then to Future Value
@@ -91,7 +94,26 @@ class Gradient(Annuity):
         self.G = G
 
     def to_pv(self, i):
-        pass
+        pv1 = self.amount * ((1 + i)**self.D - 1) / (i * (1+i)**self.D)  # Annuity Term
+        pv2 = self.G * ((1 + i)**n - i * self.D - 1) / (i**2 * (1 + i) ** D))  # Gradient Term
+        pv = pv1 + pv2
+        if self.d[0] == 1:  # Requested gradient is equivalet to this instance
+            return sp.Present(pv)
+        else:  # The gradient starts at n > 0, so we need to convert a "future present value" to a present value
+            return sp.Future(pv, d[0]).to_pv(i)
+
+    def to_fv(self, i, n):
+        return self.to_pv(i).to_fv(i, n)
+
+    def to_av(self, i, d):
+        d = self.parse_d(d)
+        D = d[1] - d[0] + 1
+        
+        if d == self.d and d[0] == 1:  # Use standard formula
+            A_eq = G * (1/i - D / ((1 + i) ** n - 1))
+            return Annuity(A_eq)
+        else:
+            return self.to_pv(i).to_av(i, d)
 
 class Geometric(Annuity):
     def __init__(self, amount, d, g):
@@ -99,17 +121,39 @@ class Geometric(Annuity):
         self.g = g
     
     def to_pv(self, i):
-        # TODO this only works for d[0] = 1
         if i == self.g:
-            return sp.Present(self.amount * self.D * (1 + i) ** -1)
-        else:  # i != self.g
-            return sp.Present(self.amount * (1 - (1 + g) ** n * (1 + g) ** -n) / (i - g))
-    
+            xv = self.amount * self.D * (1 + i) ** -1
+            
+            if self.d[0] == 1:
+                return sp.Present(xv)
+            else:
+                return sp.Future(xv, self.d[0]).to_pv(i)
+        elif i > self.g:
+            xv = self.amount * (1 - (1 + self.g) ** self.D * (1 + self.g) ** -self.D) / (i - self.g)
+
+            if self.d[0] == 1:
+                return sp.Present(xv)
+            else
+                return sp.Future(xv, self.d[0]).to_pv(i)
+        else
+            raise ValueError("Geometric rate (g) cannot exceed interest rate (i)!")
+
     def to_fv(self, i, n):
+        """if i == self.g:
+           pass
+        elif i > self.g:
+            if self.d[0] == 1:
+                if d == self.d:
+                    fv = self.amount * ((1 + i)**n - (1 + g)**n)/(i-g)
+                    return sp.Future(fv, n)
+                else:
+                    return self.to_pv(i).to_fv(i, n)
+            else:
+        """
         return self.to_pv(i).to_fv(i, n)
 
-    def to_av(self, i, n):
-        pass
+    def to_av(self, i, d):
+        return self.to_pv(i).to_av(i, d)
 
 class Perpetuity(Cashflow):
     def to_pv(self, i):

@@ -28,8 +28,15 @@ class Present(Cashflow):
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = us.Annuity.parse_d(d)
         D = d[1] - d[0] + 1
-        return us.Annuity(self.amount * ((i * (1+i)**D) / ((1+i)**D) - 1), d)
-
+        
+        if d[0] == 1:
+            av = self.amount * ((i * (1+i)**D) / ((1+i)**D) - 1)
+            return us.Annuity(pv, d)
+        else:  # We must get the "Future Present Value" and use that to compute
+               # the value of our annuity.
+            fpv = self.amount * (1 + i) ** d[0]
+            av = fpv * ((i * (1+i)**D) / ((1+i)**D) - 1)
+            return us.Annuity(av, d)
 
 class Future(Cashflow):
     """
@@ -61,7 +68,7 @@ class Future(Cashflow):
         if self.n == n:
             return self
         else:
-            return Future(self.to_pv().amount, i, n)
+            return self.to_pv(i).to_fv(i, n)
 
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = Annuity.parse_d(d)
