@@ -49,6 +49,18 @@ class Future(Cashflow):
         super().__init__(amount)
         self.n = n
 
+    def __add__(self, other):
+        if self.n == other.n:
+            return Future(self.amount + other.amount, self.n)
+        else:
+            raise ArithmeticError("Cannot add two Future cashflows with different periods!")
+
+    def __radd__(self, other):
+        if other == 0:  # first iteration of sum()
+            return self
+        else:
+            return self.__add__(other)
+
     def __repr__(self):
         """
         Author: Thomas Richmond
@@ -64,7 +76,7 @@ class Future(Cashflow):
     def to_pv(self, i):
         return Present(self.amount * (1 + i) ** (-self.n))
 
-    def to_fv(self, n):
+    def to_fv(self, i, n):
         if self.n == n:
             return self
         else:
