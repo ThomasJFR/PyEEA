@@ -18,6 +18,12 @@ class Present(Cashflow):
             return self
         else:
             return self.__add__(other)
+    
+    def __repr__(self):
+        """
+        Example: $24,000(P)
+        """
+        return super().__str__().format(('P'))
 
     def to_pv(self, i=None):
         return self
@@ -61,17 +67,13 @@ class Future(Cashflow):
         else:
             return self.__add__(other)
 
-    def __repr__(self):
+    def __str__(self):
         """
         Author: Thomas Richmond
         Purpose: Displays a cash amount in a pretty format.
-        Example: << Future:  $12,900.00 @ n=10 >>
+        Example: -$12,000(F, 6)
         """
-        return "<< {}: {}${:,.2f} @ n={} >>".format(
-            self.get_name(),
-            '-' if self.amount < 0 else ' ',
-            abs(self.amount),
-            self.n)
+        return super().__str__().format(('F', self.n))
 
     def to_pv(self, i):
         return Present(self.amount * (1 + i) ** (-self.n))

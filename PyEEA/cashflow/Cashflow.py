@@ -21,18 +21,18 @@ class Cashflow(ABC):
     def __init__(self, amount):
         self.amount = amount
 
-    def __repr__(self):
+    def __str__(self):
         """
         Author: Thomas Richmond
         Purpose: Displays a cash amount in a pretty format.
                  To display any additional info in children,
                  overwrite this function 
-        Example: << Present: -$12,600,120.12>>
+        Example: -$12,600,120.12(STUFF)
         """
-        return "<< {}: {}${:,.2f} >>".format(
-            self.get_name(),
-            '-' if self.amount < 0 else ' ',
-            abs(self.amount))
+        rstring = "{}${:,.2f}".format(
+                  '-' if self.amount < 0 else ' ',
+                  abs(self.amount))
+        return rstring + "{}"
 
     @classmethod
     def get_name(cls):
