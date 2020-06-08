@@ -95,7 +95,7 @@ class Gradient(Annuity):
 
     def to_pv(self, i):
         pv1 = self.amount * ((1 + i)**self.D - 1) / (i * (1+i)**self.D)  # Annuity Term
-        pv2 = self.G * ((1 + i)**n - i * self.D - 1) / (i**2 * (1 + i) ** D))  # Gradient Term
+        pv2 = self.G * ((1 + i)**self.D - i * self.D - 1) / (i**2 * (1 + i) ** self.D)  # Gradient Term
         pv = pv1 + pv2
         if self.d[0] == 1:  # Requested gradient is equivalet to this instance
             return sp.Present(pv)
@@ -133,9 +133,9 @@ class Geometric(Annuity):
 
             if self.d[0] == 1:
                 return sp.Present(xv)
-            else
+            else:
                 return sp.Future(xv, self.d[0]).to_pv(i)
-        else
+        else:
             raise ValueError("Geometric rate (g) cannot exceed interest rate (i)!")
 
     def to_fv(self, i, n):

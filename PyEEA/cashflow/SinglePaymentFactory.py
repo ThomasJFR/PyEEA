@@ -31,7 +31,7 @@ class Present(Cashflow):
         
         if d[0] == 1:
             av = self.amount * ((i * (1+i)**D) / ((1+i)**D) - 1)
-            return us.Annuity(pv, d)
+            return us.Annuity(av, d)
         else:  # We must get the "Future Present Value" and use that to compute
                # the value of our annuity.
             fpv = self.amount * (1 + i) ** d[0]
