@@ -54,13 +54,23 @@ sp.Present( 1000)  # << Present:  $1000 >>
 sp.Future( -1000, 3)  # << Future:  -$1000 @ n=3 >>
 
 from PyEEA import UniformSeriesFactory as us
-us.Annuity(1000, [1, 10])  # << Annuity: $1000 for d=[1, 10] >>
-us.Gradient(1000, [5, 10], 100) # << Gradient: $1000 with G= $100 for d=[5, 10]>>
-
-# TODO:
-us.Geometric(...)
+us.Annuity(   1000, 5)              # << Annuity: $1000 for d=[0, 5] >>
+us.Gradient(  1000, [4],     100)   # << Gradient: $1000 with G=$100 for d=[0, 4] >>
+us.Geometric( 1000, [1, 10], 0.04)  # << Geometric: $1000 with g=4% for d=[1, 10] >>
 us.Perpetuity(...)
 us.GeoPerpetuity(...)
+```
+
+### Project Valuation
+
+Once a project has been defined with a variety of cashflows, we can valuate the project using a variety of valuation methods:
+
+``` Python
+my_project.ncfs()  # Net Cashflows for Every Period
+my_project.npw()   # Net Present Worth
+my_project.eucf()  # Equivalent Uniform Cashflow
+my_project.irr()   # Internal Rate of Return
+my_project.mirr()  # Modified Internal Rate of Return
 ```
 
 ## Pronunciation
