@@ -44,6 +44,12 @@ my_project.add_cashflows([
 ])
 ```
 
+### Time
+
+Every cashflow occurs during a period n. This is not to be confused with a node, which denotes a discrete point in time separating periods. This distinction is illustrated below.
+
+<img align='right' src='./assets/TimeNotation.png' alt=''/>
+
 To view the cashflows occuring at each period (as an array of `Cashflow` instances), we use indeces and slices as follows:
 ``` Python
 my_project[1]    # Gets the cashflows at period 1
