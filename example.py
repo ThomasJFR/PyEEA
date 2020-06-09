@@ -10,7 +10,7 @@ my_project                                \
     .add_cashflow( sp.Future(-100, 5))    \
     .add_cashflow( sp.Future( 5000, 5))
 
-print(my_project[2,4])
+print([[str(cf) for cf in p] for p in my_project[:]])
 print("Equivalent Uniform Cashflow of Project:", my_project.eucf(5))
 print("Benefit-to-Cost Ratio:", my_project.bcr())
 print("IRR:", my_project.irr())
