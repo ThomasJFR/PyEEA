@@ -44,6 +44,15 @@ my_project.add_cashflows([
 ])
 ```
 
+To view the cashflows occuring at each period (as an array of `Cashflow` instances), we use indeces and slices as follows:
+``` Python
+my_project[1]    # Gets the cashflows at period 1
+my_project[2,5]  # Gets the cashflows at periods 2 and 5
+my_project[:3]   # Gets the cashflows up to and including period 3
+my_project[2:5]  # Gets the cashflows between periods 2 and 5, inclusive
+my_project[::2]  # Gets the cashflows from every second period
+```
+
 ### Cashflow Models
 
 Several cashflow models are supported, as follows:
