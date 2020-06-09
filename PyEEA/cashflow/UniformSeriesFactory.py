@@ -128,7 +128,7 @@ class Geometric(Annuity):
         self.g = g
     
     def to_shorthand(self):
-        return super().to_shorthand(('g', self.d, self.g))
+        return super().to_shorthand(('g', self.d, str(self.g * 100) + '%'))
     
     def cashflow_at(self, n):
         if n in range(self.d[0] + 1, self.d[1] + 1):
@@ -197,7 +197,7 @@ class GeoPerpetuity(Perpetuity):
         self.g = g  # Geometric rate
 
     def to_shorthand(self):
-        return super().to_shorthand(('g', 'inf', self.g))
+        return super().to_shorthand(('g', 'inf', str(self.g * 100) + '%'))
     
     def cashflow_at(self, n):
         if n in range(self.d[0] + 1, self.d[1] + 1):
