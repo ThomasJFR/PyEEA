@@ -186,7 +186,7 @@ class Project:
     def mirr(self, e_inv=None, e_fin=None):
         ncfs = self.get_ncfs()
         
-        fvb = sum([ncf.to_fv(e_fin or self.interest, self.periods) for ncf in ncfs if ncf.amount > 0]) or sp.Future(0, self.duration)
+        fvb = sum([ncf.to_fv(e_fin or self.interest, self.periods) for ncf in ncfs if ncf.amount > 0]) or sp.Future(0, self.periods)
         pvc = sum([ncf.to_pv(e_inv or self.interest) for ncf in ncfs if ncf.amount < 0]) or sp.Present(0)
         
         return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self.interest)[0]
