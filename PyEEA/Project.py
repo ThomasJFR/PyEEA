@@ -30,7 +30,7 @@ class Project:
             ns = val  # Get the cashflows of multiple periods as a 2D array
         elif type(val) == slice:
             start = val.start or 0
-            stop  = (val.stop + 1) if val.stop else self.periods
+            stop  = (val.stop if val.stop else self.periods) + 1
             step  = val.step or 1
             ns = range(start, stop, step)
                 
@@ -40,7 +40,6 @@ class Project:
         cfs = []
         for n in ns:
             cfs.append([cf for cf in self.cashflows if match_period(cf, n)])
-            
         return cfs[0] if len(cfs) == 1 else cfs
 
     def __add__(self, other):
@@ -101,10 +100,10 @@ class Project:
             pass
         elif type(cf) == sp.Future:
             if cf.n > self.periods:
-                self.duration = cf.n
+                self.periods = cf.n
         elif isinstance(cf, sp.Annuity):
             if cf.d[1] > self.periods:
-                self.duration = cf.d[1]
+                self.periods = cf.d[1]
 
         self.cashflows.append(cf)
         return self  # Daisy Chaining!
@@ -139,7 +138,8 @@ class Project:
         Returns: An array of net cashflows throughout the whole project
         """
         ncfs = []
-        for cfs in self[:]:
+        for n in range(self.periods + 1):
+            cfs = self[n]  # Get the cashflows for this period
             if len(cfs) == 0:
                 ncfs.append(sp.Present(0) if n == 0 else sp.Future(0, n))
                 continue
@@ -183,11 +183,11 @@ class Project:
         # WARNING: This only gets one value of IRR, but there could be more than one...
         return fsolve(lambda i: self.npw(i).amount, self.interest)[0]
 
-    def mirr(self):
+    def mirr(self, e_inv=None, e_fin=None):
         ncfs = self.get_ncfs()
         
-        fvb = sum([ncf.to_fv(self.interest, self.duration) for ncf in ncfs if ncf.amount > 0]) or sp.Future(0, self.duration)
-        pvc = sum([ncf.to_pv(self.interest) for ncf in ncfs if ncf.amount < 0]) or sp.Present(0)
+        fvb = sum([ncf.to_fv(e_fin or self.interest, self.periods) for ncf in ncfs if ncf.amount > 0]) or sp.Future(0, self.duration)
+        pvc = sum([ncf.to_pv(e_inv or self.interest) for ncf in ncfs if ncf.amount < 0]) or sp.Present(0)
         
         return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self.interest)[0]
 
