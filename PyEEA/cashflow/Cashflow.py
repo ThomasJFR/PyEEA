@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+from collections.abc import Iterable
 
 
 class PaymentScheme(Enum):
@@ -29,10 +30,21 @@ class Cashflow(ABC):
                  overwrite this function 
         Example: -$12,600,120.12(STUFF)
         """
-        rstring = "{}${:,.2f}".format(
-                  '-' if self.amount < 0 else ' ',
-                  abs(self.amount))
-        return rstring + "{}"
+        return self.to_shorthand()  # This will call from the context of the child.
+
+    def to_shorthand(self, info):
+        # Step 1: Add the cash amount
+        # EXAMPLE: -$12,229,999.99
+        valstr = "{}${:,.2f}".format(
+                 '-' if self.amount < 0 else ' ',
+                 abs(self.amount))
+
+        # Step 2: Add notated information
+        # EXAMPLE: (G, [2,5], 210)
+        info = info if isinstance(info, Iterable) else [info]  # Make info iterable if it isn't
+        infostr = "(" + ", ".join([str(i) for i in info]) + ")"
+
+        return valstr + infostr
 
     @classmethod
     def get_name(cls):
@@ -49,4 +61,3 @@ class Cashflow(ABC):
     @abstractmethod
     def to_av(self, i, d, scheme):
         pass
-

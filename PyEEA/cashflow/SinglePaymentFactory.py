@@ -19,11 +19,11 @@ class Present(Cashflow):
         else:
             return self.__add__(other)
     
-    def __repr__(self):
+    def to_shorthand(self):
         """
         Example: $24,000(P)
         """
-        return super().__str__().format(('P'))
+        return super().to_shorthand(('P'))
 
     def to_pv(self, i=None):
         return self
@@ -67,13 +67,11 @@ class Future(Cashflow):
         else:
             return self.__add__(other)
 
-    def __str__(self):
+    def to_shorthand(self):
         """
-        Author: Thomas Richmond
-        Purpose: Displays a cash amount in a pretty format.
         Example: -$12,000(F, 6)
         """
-        return super().__str__().format(('F', self.n))
+        return super().to_shorthand(('F', self.n))
 
     def to_pv(self, i):
         return Present(self.amount * (1 + i) ** (-self.n))

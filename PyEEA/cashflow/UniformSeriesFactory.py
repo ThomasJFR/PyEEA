@@ -7,13 +7,11 @@ class Annuity(Cashflow):
         self.d = self.parse_d(d)  # The start and end period of the annuity
         self.D = self.d[1] - self.d[0] + 1  # The number of periods for the annuity
 
-    def __str__(self, alt=None):
+    def to_shorthand(self, alt=None):
         """
-        Author: Thomas Richmond
-        Purpose: Displays a cash amount in a pretty format.
-        Example: -$10(A, [0, 10]) 
+        Example: -$10(A, [0, 10])
         """
-        return super().__str__().format(alt or ('A', self.d))
+        return super().to_shorthand(alt or ('A', self.d))
 
        
     @classmethod
@@ -99,8 +97,8 @@ class Gradient(Annuity):
         super().__init__(amount, d)
         self.G = G
     
-    def __str__(self):
-        return super().__str__(alt=('G', self.d, self.G))
+    def to_shorthand(self):
+        return super().to_shorthand(('G', self.d, self.G))
 
     def cf_at_period(self, n):
         if n in range(self.d[0], self.d[1] + 1):
@@ -143,8 +141,8 @@ class Geometric(Annuity):
         super().__init__(amount, d)
         self.g = g
     
-    def __str__(self):
-        return super().__str__(alt=('g', self.d, self.g))
+    def to_shorthand(self):
+        return super().to_shorthand(('g', self.d, self.g))
     
     def cf_at_period(self, n):
         if n in range(self.d[0], self.d[1] + 1):
@@ -197,8 +195,8 @@ class Geometric(Annuity):
 
 class Perpetuity(Cashflow):
 
-    def __str__(self, alt=None):
-        return super().__str__().format(alt or ('A', 'inf'))
+    def to_shorthand(self, alt=None):
+        return super().to_shorthand(alt or ('A', 'inf'))
 
     def cf_at(self, n):
         return sp.Future(self.amount, n)
@@ -218,8 +216,8 @@ class GeoPerpetuity(Perpetuity):
         super().__init__(amount)
         self.g = g  # Geometric rate
 
-    def __str__(self):
-        return super().__str__(('g', 'inf', self.g))
+    def to_shorthand(self):
+        return super().to_shorthand(('g', 'inf', self.g))
 
     def to_pv(self, i):
         if i <= self.g:
