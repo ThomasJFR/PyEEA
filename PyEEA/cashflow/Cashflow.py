@@ -22,6 +22,12 @@ class Cashflow(ABC):
     def __init__(self, amount):
         self.amount = amount
 
+    def __radd__(self, other):
+        if other == 0:  # first iteration of sum()
+            return self
+        else:
+            return self.__add__(other)
+
     def __str__(self):
         """
         Author: Thomas Richmond
