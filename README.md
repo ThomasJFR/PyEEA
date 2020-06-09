@@ -76,6 +76,15 @@ us.Perpetuity(    100)			# $100('A', 'inf')
 us.GeoPerpetuity( 100, 0.05)		# $100('g', 'inf', 5%)
 ```
 
+The cashflow of a model at a period n can be retrieved as follows:
+
+``` Python
+my_annuity = us.Annuity(1000, 10)
+my_annuity.cashflow_at(5)  # Output: $1000(F, 5)
+# Or, Equivalently,
+my_annuity @ 5             # Output: $1000(F, 5)
+```
+
 ### Project Valuation
 
 Once a project has been defined with a variety of cashflows, we can valuate the project using a variety of valuation methods:
