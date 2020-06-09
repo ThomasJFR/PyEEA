@@ -22,6 +22,14 @@ class Future(Cashflow):
         else:
             raise ArithmeticError("Cannot add two Single cashflows occurring at different periods!")
 
+    def cashflow_at(self, n):
+        if type(n) is not int:
+            raise ValueError("Argument n of the statement << Cashflow @ n >> must be a period!")
+        elif n == self.n:
+            return self
+        else:
+            return Future(0, n) if self.n > 0 else Present(0);
+
     def to_shorthand(self, alt=None):
         """
         Example: -$12,000(F, 6)

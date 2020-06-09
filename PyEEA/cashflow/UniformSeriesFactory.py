@@ -7,13 +7,50 @@ class Annuity(Cashflow):
         self.d = self.parse_d(d)  # The start and end period of the annuity
         self.D = self.d[1] - self.d[0] + 1  # The number of periods for the annuity
 
+    def cashflow_at(self, n):
+        if n in range(self.d[0] + 1, self.d[1] + 1):
+            return sp.Future(self.amount, n) if n > 0 else sp.Present(self.amount)
+        else:
+            return sp.Future(0, n) if n > 0 else sp.Present(0)
+
     def to_shorthand(self, alt=None):
         """
         Example: -$10(A, [0, 10])
         """
         return super().to_shorthand(alt or ('A', self.d))
 
-       
+    def to_pv(self, i):
+        pv = self.amount * ((1 + i)**self.D - 1) / (i * (1+i)**self.D)
+
+        if self.d[0] == 0:  # PV is correct
+            return sp.Present(pv)
+        else:  # If our annuity begins in the future, v is a FV and must
+               # be converted to a PV.
+            return sp.Future(pv, self.d[0]).to_pv(i)
+
+    def to_fv(self, i, n):
+        if self.d[0] == 0:  # Use standard formulas
+            if self.d[1] == n:
+                fv = self.amount * ((1 + i)**n - 1) / i
+                return sp.Future(fv, n)
+            else:
+                return self.to_pv(i).to_fv(i, n)
+        else:  # Annuity is not ordinary; convert to "Future Present Value", -
+               # that is, the future value at the starting period of the annuity -
+               # then to Present Value, then to Future Value
+            fpv = self.amount * ((1 + i)**self.dn - 1) / (i * (1+i)**self.dn)
+            return sp.Future(fpv, d[0]).to_pv(i).to_fv(i, n)
+    
+
+    def to_av(self, i, d, scheme=ps.ARREAR):
+        d = self.parse_d(d)
+        D = d[1] - d[0] + 1
+
+        if d == self.d:  # The requested annuity is equivalent to this instance
+            return self
+        else:
+            return self.to_pv(i).to_av(i, d)
+
     @classmethod
     def parse_d(cls, d):
         """
@@ -48,50 +85,6 @@ class Annuity(Cashflow):
             raise TypeError("Type of argument n <%s> is not supported;" % type(d) + \
                             "must be whole number or list of whole numbers")
 
-    def cf_at(self, n):
-        if n in range(self.d[0], self.d[1] + 1):
-            if n == 0:
-                return sp.Present(0)
-            else:
-                return sp.Future(self.amount, n)
-        else:
-            if n == 0:
-                return sp.Present(0)
-            else:
-                return sp.Future(0, n)
-
-    def to_pv(self, i):
-        pv = self.amount * ((1 + i)**self.D - 1) / (i * (1+i)**self.D)
-
-        if self.d[0] == 0:  # PV is correct
-            return sp.Present(pv)
-        else:  # If our annuity begins in the future, v is a FV and must
-               # be converted to a PV.
-            return sp.Future(pv, self.d[0]).to_pv(i)
-
-    def to_fv(self, i, n):
-        if self.d[0] == 0:  # Use standard formulas
-            if self.d[1] == n:
-                fv = self.amount * ((1 + i)**n - 1) / i
-                return sp.Future(fv, n)
-            else:
-                return self.to_pv(i).to_fv(i, n)
-        else:  # Annuity is not ordinary; convert to "Future Present Value", -
-               # that is, the future value at the starting period of the annuity -
-               # then to Present Value, then to Future Value
-            fpv = self.amount * ((1 + i)**self.dn - 1) / (i * (1+i)**self.dn)
-            return sp.Future(fpv, d[0]).to_pv(i).to_fv(i, n)
-    
-
-    def to_av(self, i, d, scheme=ps.ARREAR):
-        d = self.parse_d(d)
-        D = d[1] - d[0] + 1
-
-        if d == self.d:  # The requested annuity is equivalent to this instance
-            return self
-        else:
-            return self.to_pv(i).to_av(i, d)
-
 class Gradient(Annuity):
     def __init__(self, amount, d, G):
         super().__init__(amount, d)
@@ -100,19 +93,12 @@ class Gradient(Annuity):
     def to_shorthand(self):
         return super().to_shorthand(('G', self.d, self.G))
 
-    def cf_at_period(self, n):
-        if n in range(self.d[0], self.d[1] + 1):
-            if n == 0:
-                return sp.Present(self.amount)
-            else:
-                fv = self.amount + self.G * (n - self.d[0])
+    def cashflow_at(self, n):
+        if n in range(self.d[0] + 1, self.d[1] + 1):
+                fv = self.amount + self.G * (n - self.d[0] - 1)
                 return sp.Future(fv, n)
         else:
-            if n == 0:
-                return sp.Present(0)
-            else:
-                return sp.Future(0, n)
-
+            return sp.Future(0, n) if n > 0 else sp.Present(0)
 
     def to_pv(self, i):
         pv1 = self.amount * ((1 + i)**self.D - 1) / (i * (1+i)**self.D)  # Annuity Term
@@ -144,19 +130,12 @@ class Geometric(Annuity):
     def to_shorthand(self):
         return super().to_shorthand(('g', self.d, self.g))
     
-    def cf_at_period(self, n):
-        if n in range(self.d[0], self.d[1] + 1):
-            if n == 0:
-                return sp.Present(self.amount)
-            else:
-                fv = self.amount * (1 + g)**(n - self.d[0])
-                return sp.Future(fv, n)
+    def cashflow_at(self, n):
+        if n in range(self.d[0] + 1, self.d[1] + 1):
+            fv = self.amount * (1 + g)**(n - self.d[0] - 1)
+            return sp.Future(fv, n)
         else:
-            if n == 0:
-                return sp.Present(0)
-            else:
-                return sp.Future(0, n)
-
+            return sp.Future(0, n) if n > 0 else p.Present(0)
 
     def to_pv(self, i):
         if i == self.g:
@@ -194,11 +173,12 @@ class Geometric(Annuity):
         return self.to_pv(i).to_av(i, d)
 
 class Perpetuity(Cashflow):
-
+    # TODO Need to implement support for starting at n > 0
+    
     def to_shorthand(self, alt=None):
         return super().to_shorthand(alt or ('A', 'inf'))
 
-    def cf_at(self, n):
+    def cashflow_at(self, n):
         return sp.Future(self.amount, n)
 
     def to_pv(self, i):
@@ -218,7 +198,14 @@ class GeoPerpetuity(Perpetuity):
 
     def to_shorthand(self):
         return super().to_shorthand(('g', 'inf', self.g))
-
+    
+    def cashflow_at(self, n):
+        if n in range(self.d[0] + 1, self.d[1] + 1):
+            fv = self.amount * (1 + g)**(n-1)
+            return sp.Future(fv, n)
+        else:
+            return sp.Future(0, n) if n > 0 else p.Present(0)
+    
     def to_pv(self, i):
         if i <= self.g:
             raise ValueError("Geometric Perpetuity rate (g) must be greater than the interest rate (i)!")

@@ -22,12 +22,6 @@ class Cashflow(ABC):
     def __init__(self, amount):
         self.amount = amount
 
-    def __radd__(self, other):
-        if other == 0:  # first iteration of sum()
-            return self
-        else:
-            return self.__add__(other)
-
     def __str__(self):
         """
         Author: Thomas Richmond
@@ -37,6 +31,20 @@ class Cashflow(ABC):
         Example: -$12,600,120.12(STUFF)
         """
         return self.to_shorthand()  # This will call from the context of the child.
+
+    def __radd__(self, other):
+        if other == 0:  # first iteration of sum()
+            return self
+        else:
+            return self.__add__(other)
+
+    def __matmul__(self, n):
+        """
+        Implemented so we can get the cashflow that occurs at period n as follows:
+            my_cashflow @ 2
+        For single payments, the value is zero unless the periods match
+        """
+        return self.cashflow_at(n)
 
     def to_shorthand(self, info):
         # Step 1: Add the cash amount
@@ -52,9 +60,9 @@ class Cashflow(ABC):
 
         return valstr + infostr
 
-    @classmethod
-    def get_name(cls):
-        return cls.__name__
+    @abstractmethod
+    def cashflow_at(self, n):
+        pass
 
     @abstractmethod
     def to_pv(self, i):
@@ -67,3 +75,7 @@ class Cashflow(ABC):
     @abstractmethod
     def to_av(self, i, d, scheme):
         pass
+    
+    @classmethod
+    def get_name(cls):
+        return cls.__name__
