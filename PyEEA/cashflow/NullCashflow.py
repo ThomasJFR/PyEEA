@@ -2,6 +2,7 @@ from .Cashflow import Cashflow
 from . import SinglePaymentFactory as sp
 from . import UniformSeriesFactory as us
 
+
 class NullCashflow(Cashflow):
     """
     Author: Thomas Richmond
@@ -11,7 +12,7 @@ class NullCashflow(Cashflow):
                  This instance is generally used to explicitly indicate that a cashflow has 
                  no effect at a period, or that there are no cashflows in a period.
     """
-    
+
     def __init__(self):
         return super().__init__(0)
 
@@ -19,7 +20,7 @@ class NullCashflow(Cashflow):
         return other
 
     def to_shorthand(self):
-        return super().to_shorthand(('N',))
+        return super().to_shorthand(("N",))
 
     def cashflow_at(self, n):
         return self
@@ -32,4 +33,3 @@ class NullCashflow(Cashflow):
 
     def to_av(self, i, d, scheme):
         return us.Annuity(0, d)
-

@@ -2,6 +2,7 @@ from .Cashflow import Cashflow, PaymentScheme as ps
 from . import SinglePaymentFactory as sp
 from . import NullCashflow as nu
 
+
 class Annuity(Cashflow):
     def __init__(self, amount, d):
         super().__init__(amount)
@@ -103,7 +104,7 @@ class Gradient(Annuity):
             fv = self.amount + self.G * (n - self.d[0] - 1)
             return sp.Future(fv, n)
         else:
-            return nu.NullCashflow() 
+            return nu.NullCashflow()
 
     def to_pv(self, i):
         pv1 = (
@@ -145,7 +146,7 @@ class Geometric(Annuity):
             fv = self.amount * (1 + g) ** (n - self.d[0] - 1)
             return sp.Future(fv, n)
         else:
-            return nu.NullCashflow() 
+            return nu.NullCashflow()
 
     def to_pv(self, i):
         if i == self.g:

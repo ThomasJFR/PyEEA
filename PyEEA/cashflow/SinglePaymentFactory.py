@@ -2,6 +2,7 @@ from .Cashflow import Cashflow, PaymentScheme as ps
 from . import UniformSeriesFactory as us
 from . import NullCashflow as nu
 
+
 class Future(Cashflow):
     """
     Author: Thomas Richmond
@@ -92,4 +93,3 @@ class Present(Future):
             fpv = self.amount * (1 + i) ** d[0]
             av = fpv * ((i * (1 + i) ** D) / ((1 + i) ** D) - 1)
             return us.Annuity(av, d)
-
