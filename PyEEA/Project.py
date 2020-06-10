@@ -35,17 +35,8 @@ class Project:
             stop = (val.stop if val.stop else self.periods) + 1
             step = val.step or 1
             ns = range(start, stop, step)
-
-        match_period = lambda cf, n: any(
-            [
-                isinstance(cf, sp.Present) and n == 0,
-                isinstance(cf, sp.Future) and cf.n == n,
-                isinstance(cf, us.Annuity) and cf.n in range(cf.d[0], cf.d[1] + 1),
-            ]
-        )
-        cfs = []
-        for n in ns:
-            cfs.append([cf for cf in self.cashflows if match_period(cf, n)])
+        
+        cfs = [[cf @ n for cf in self.cashflows] for n in ns]
         return cfs[0] if len(cfs) == 1 else cfs
 
     def __add__(self, other):
@@ -106,7 +97,7 @@ class Project:
         elif type(cf) == sp.Future:
             if cf.n > self.periods:
                 self.periods = cf.n
-        elif isinstance(cf, sp.Annuity):
+        elif isinstance(cf, us.Annuity):
             if cf.d[1] > self.periods:
                 self.periods = cf.d[1]
 
@@ -148,13 +139,8 @@ class Project:
             if len(cfs) == 0:
                 ncfs.append(sp.Present(0) if n == 0 else sp.Future(0, n))
                 continue
-
-            ncf = sp.Present(0) if n == 0 else sp.Future(0, n)
-            for cf in cfs:
-                if isinstance(cf, sp.Present) or isinstance(cf, sp.Future):
-                    ncf += cf
-                elif isinstance(cf, us.Annuity):
-                    ncf += cf.cf_at(n)
+            
+            ncf = sum([cf @ n for cf in cfs]) or (sp.Future(0, n) if n > 0 else sp.Present(0))
             ncfs.append(ncf)
 
         return ncfs
