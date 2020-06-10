@@ -33,7 +33,7 @@ class Future(Cashflow):
         elif n == self.n:
             return self
         else:
-            return Future(0, n) if self.n > 0 else Present(0)
+            return Future(0, n) if n > 0 else Present(0)
 
     def to_shorthand(self, alt=None):
         """
