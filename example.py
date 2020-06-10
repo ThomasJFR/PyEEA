@@ -14,8 +14,7 @@ print("-------------")
 my_project = Project(interest=0.12)
 my_project                                \
     .add_cashflow(sp.Present( 5000))      \
-    .add_cashflow(us.Annuity( 250, 5))    \
-    .add_cashflow( sp.Future(-1000,  1))  \
+    .add_cashflow(us.Annuity( 250, [2,5])) \
     .add_cashflow( sp.Future(-600,  2))   \
     .add_cashflow( sp.Future(-500,  3))   \
     .add_cashflow( sp.Future(-100, 5))

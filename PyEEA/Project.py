@@ -1,7 +1,7 @@
 from scipy.optimize import fsolve
 from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
-
+from .cashflow import NullCashflow
 
 class Project:
     """
@@ -36,7 +36,18 @@ class Project:
             step = val.step or 1
             ns = range(start, stop, step)
 
-        cfs = [[cf @ n for cf in self.cashflows] for n in ns]
+        cfs_in_period = lambda n: [
+            cf for cf in self.cashflows if any(
+                [
+                    isinstance(cf, sp.Future) and n == cf.n,
+                    isinstance(cf, us.Annuity) and n in range(cf.d[0] + 1, cf.d[1] + 1)
+                ]
+            )
+        ]
+        cfs = [
+            [cf @ n for cf in cfs_in_period(n)] or [NullCashflow()] 
+            for n in ns
+        ]
         return cfs[0] if len(cfs) == 1 else cfs
 
     def __add__(self, other):
