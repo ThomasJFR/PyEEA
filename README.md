@@ -90,7 +90,7 @@ my_annuity @ 5             # Output: $1000(F, 5)
 Once a project has been defined with a variety of cashflows, we can valuate the project using a variety of valuation methods:
 
 ``` Python
-my_project.ncfs()  # Net Cashflows for Every Period
+my_project.get_ncfs()  # Net Cashflows for Every Period
 my_project.npw()   # Net Present Worth
 my_project.bcr()   # Benefit-to-Cost Ratio
 my_project.eucf()  # Equivalent Uniform Cashflow
