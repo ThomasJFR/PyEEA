@@ -1,6 +1,6 @@
 from .Cashflow import Cashflow, PaymentScheme as ps
 from . import UniformSeriesFactory as us
-
+from . import NullCashflow as nu
 
 class Future(Cashflow):
     """
@@ -17,6 +17,8 @@ class Future(Cashflow):
         self.n = n
 
     def __add__(self, other):
+        if not all([isinstance(self, Future), isinstance(other, Future)]):
+            return NotImplemented
         if self.n == other.n:
             val = self.amount + other.amount
             return Future(val, self.n) if self.n > 0 else Present(val)
@@ -33,7 +35,7 @@ class Future(Cashflow):
         elif n == self.n:
             return self
         else:
-            return Future(0, n) if n > 0 else Present(0)
+            return nu.NullCashflow()
 
     def to_shorthand(self, alt=None):
         """
@@ -90,3 +92,4 @@ class Present(Future):
             fpv = self.amount * (1 + i) ** d[0]
             av = fpv * ((i * (1 + i) ** D) / ((1 + i) ** D) - 1)
             return us.Annuity(av, d)
+
