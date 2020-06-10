@@ -1,4 +1,3 @@
-
 def effective_interest(r, m):
     """
     Author: Thomas Richmond
@@ -6,7 +5,8 @@ def effective_interest(r, m):
     Parameters: r [float] - Nominal interest expressed as a decimal
                 m [integer] - Compounding periods per year
     """
-    return (1 + r/m)**m - 1
+    return (1 + r / m) ** m - 1
+
 
 def equivalent_interest(i, c, p):
     """

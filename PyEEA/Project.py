@@ -1,6 +1,8 @@
 from scipy.optimize import fsolve
 from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
+
+
 class Project:
     """
     Author: Thomas Richmond
@@ -30,13 +32,17 @@ class Project:
             ns = val  # Get the cashflows of multiple periods as a 2D array
         elif type(val) == slice:
             start = val.start or 0
-            stop  = (val.stop if val.stop else self.periods) + 1
-            step  = val.step or 1
+            stop = (val.stop if val.stop else self.periods) + 1
+            step = val.step or 1
             ns = range(start, stop, step)
-                
-        match_period = lambda cf, n: any([isinstance(cf, sp.Present) and n == 0,
-                                          isinstance(cf, sp.Future) and cf.n == n,
-                                          isinstance(cf, us.Annuity) and cf.n in range(cf.d[0], cf.d[1] + 1)])
+
+        match_period = lambda cf, n: any(
+            [
+                isinstance(cf, sp.Present) and n == 0,
+                isinstance(cf, sp.Future) and cf.n == n,
+                isinstance(cf, us.Annuity) and cf.n in range(cf.d[0], cf.d[1] + 1),
+            ]
+        )
         cfs = []
         for n in ns:
             cfs.append([cf for cf in self.cashflows if match_period(cf, n)])
@@ -56,7 +62,6 @@ class Project:
             return self
         else:
             return self.__add__(other)
-        
 
     def __lt__(self, them):
         if type(them) == int or type(them) == float:
@@ -143,7 +148,7 @@ class Project:
             if len(cfs) == 0:
                 ncfs.append(sp.Present(0) if n == 0 else sp.Future(0, n))
                 continue
-            
+
             ncf = sp.Present(0) if n == 0 else sp.Future(0, n)
             for cf in cfs:
                 if isinstance(cf, sp.Present) or isinstance(cf, sp.Future):
@@ -156,19 +161,23 @@ class Project:
 
     def npw(self, i=None):
         if self.interest == None and i == None:
-            raise ValueError('No interest provided for npw calculations.\
-                              \nDid you mean to use set_interest(i)?')
-        
+            raise ValueError(
+                "No interest provided for npw calculations.\nDid you mean to use set_interest(i)?"
+            )
+
         return sum([cf.to_pv(i or self.interest) for cf in self.cashflows])
 
     def bcr(self, i=None):
         if self.interest == None and i == None:
-            raise ValueError('No interest provided for bcr calculations.\
-                              \nDid you mean to use set_interest(i)?')
+            raise ValueError(
+                "No interest provided for bcr calculations. \nDid you mean to use set_interest(i)?"
+            )
 
-        pvb = sum([r.to_pv(i or self.interest) for r in self.revenues()]) or sp.Present(0)
+        pvb = sum([r.to_pv(i or self.interest) for r in self.revenues()]) or sp.Present(
+            0
+        )
         pvc = sum([c.to_pv(i or self.interest) for c in self.costs()]) or sp.Present(0)
-        
+
         if pvc == 0:
             raise ArithmeticError("No costs in project; B/C is infinite!")
 
@@ -185,10 +194,18 @@ class Project:
 
     def mirr(self, e_inv=None, e_fin=None):
         ncfs = self.get_ncfs()
-        
-        fvb = sum([ncf.to_fv(e_fin or self.interest, self.periods) for ncf in ncfs if ncf.amount > 0]) or sp.Future(0, self.periods)
-        pvc = sum([ncf.to_pv(e_inv or self.interest) for ncf in ncfs if ncf.amount < 0]) or sp.Present(0)
-        
+
+        fvb = sum(
+            [
+                ncf.to_fv(e_fin or self.interest, self.periods)
+                for ncf in ncfs
+                if ncf.amount > 0
+            ]
+        ) or sp.Future(0, self.periods)
+        pvc = sum(
+            [ncf.to_pv(e_inv or self.interest) for ncf in ncfs if ncf.amount < 0]
+        ) or sp.Present(0)
+
         return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self.interest)[0]
 
     def describe():
