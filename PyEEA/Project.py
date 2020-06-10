@@ -35,7 +35,7 @@ class Project:
             stop = (val.stop if val.stop else self.periods) + 1
             step = val.step or 1
             ns = range(start, stop, step)
-        
+
         cfs = [[cf @ n for cf in self.cashflows] for n in ns]
         return cfs[0] if len(cfs) == 1 else cfs
 
@@ -139,8 +139,10 @@ class Project:
             if len(cfs) == 0:
                 ncfs.append(sp.Present(0) if n == 0 else sp.Future(0, n))
                 continue
-            
-            ncf = sum([cf @ n for cf in cfs]) or (sp.Future(0, n) if n > 0 else sp.Present(0))
+
+            ncf = sum([cf @ n for cf in cfs]) or (
+                sp.Future(0, n) if n > 0 else sp.Present(0)
+            )
             ncfs.append(ncf)
 
         return ncfs
