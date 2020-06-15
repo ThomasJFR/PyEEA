@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from collections.abc import Iterable
 
-
 class PaymentScheme(Enum):
     ARREAR = "payment in arrear"
     DUE = "payment in due"
@@ -18,9 +17,13 @@ class Cashflow(ABC):
                                   characteristic interest factor of the cash flow.
                                   (e.g. < amount * (P|F, i, n) >)
     """
+    
+    cashflow_id = 1  # Iterating counter used whenever a title isn't given
 
-    def __init__(self, amount):
+    def __init__(self, amount, title=None):
         self.amount = amount
+        self.title = title or ("%s %i " % (self.get_name(), Cashflow.cashflow_id))
+        Cashflow.cashflow_id +=  1
 
     def __str__(self):
         """
@@ -45,6 +48,12 @@ class Cashflow(ABC):
         For single payments, the value is zero unless the periods match
         """
         return self.cashflow_at(n)
+    
+    def set_title(self, title):
+        self.title = title
+    
+    def get_title(self):
+        return self.title
 
     def to_shorthand(self, info):
         # Step 1: Add the cash amount

@@ -11,7 +11,7 @@ class Annuity(Cashflow):
 
     def cashflow_at(self, n):
         if n in range(self.d[0] + 1, self.d[1] + 1):
-            return sp.Future(self.amount, n) if n > 0 else sp.Present(self.amount)
+            return sp.Future(self.amount, n, title=self.title) if n > 0 else sp.Present(self.amount, title=self.title)
         else:
             return nu.NullCashflow()
 
