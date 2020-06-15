@@ -1,1 +1,2 @@
-from .spreadsheet import to_csv, to_excel
+# __init__.py
+from .spreadsheet import write_csv, write_excel

@@ -1,6 +1,6 @@
 from ..cashflow import SinglePaymentFactory as sp
 
-def to_csv(filename, project):
+def write_csv(filename, project):
     import csv
     
     titles = ["Period"] + [cf.get_title() for cf in project.get_cashflows()]
@@ -19,7 +19,7 @@ def to_csv(filename, project):
                         nextrow.append(0)
             writer.writerow(nextrow)
 
-def to_excel(filename, project, show_npv=False):
+def write_excel(filename, project, show_npv=False):
     import xlsxwriter
 
     titles = ["Period"] + [cf.get_title() for cf in project.get_cashflows()]
