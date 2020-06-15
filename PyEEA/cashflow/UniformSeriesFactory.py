@@ -7,7 +7,7 @@ class Annuity(Cashflow):
     def __init__(self, amount, d):
         super().__init__(amount)
         self.d = self.parse_d(d)  # The start and end period of the annuity
-        self.D = self.d[1] - self.d[0] + 1  # The number of periods for the annuity
+        self.D = self.d[1] - self.d[0]  # The number of periods for the annuity
 
     def cashflow_at(self, n):
         if n in range(self.d[0] + 1, self.d[1] + 1):
