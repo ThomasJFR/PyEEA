@@ -19,10 +19,9 @@ def write_csv(filename, project):
                         nextrow.append(0)
             writer.writerow(nextrow)
 
-def write_excel(filename, project, show_npv=False):
+def write_excel(filename, project, features=[]):
     import xlsxwriter
 
-    titles = ["Period"] + [cf.get_title() for cf in project.get_cashflows()]
     with xlsxwriter.Workbook(filename) as wb:
         bld = wb.add_format({'bold': True})
         pct = wb.add_format({'num_format': '0.00%'})
@@ -30,7 +29,7 @@ def write_excel(filename, project, show_npv=False):
 
         ws = wb.add_worksheet()
         
-        row = 0
+        row, col = 0, 0
         
         # HEADER
         ws.write(row, 0, project.title, bld)
@@ -38,24 +37,31 @@ def write_excel(filename, project, show_npv=False):
 
         ws.write(row, 0, "Interest", bld)
         ws.write(row, 1, project.interest, pct)
-        row += 1
+        row += 2  # Add space between header and cashflow content
 
         # TITLES
-        for i in range(len(titles)):
-            ws.write(row, i, titles[i], bld)
-        if show_npv:
-            ws.write(row, len(titles), "Net Present Worth", bld)
+        cf_titles = [cf.get_title() for cf in project.get_cashflows()]
+        titles = [
+            "Period", 
+            *cf_titles,
+            # *features
+        ]
+        ws.write_row(row, 0, titles, bld)
         row += 1
 
-        # DATA
-        for n in range(project.periods + 1): 
-            ws.write(row, 0, n)
-            for cf in project[n]:
-                for col, title in enumerate(titles):
-                    if cf.title == title:  # This can only happen once!
-                        ws.write(row, col, cf.cashflow_at(n).amount, fin)
-            if show_npv:
-                npv = sum([cf @ n for cf in project[n]]).to_pv(project.interest).amount
-                ws.write(row, len(titles), npv, fin)
-            row += 1
+        # PERIODS
+        period_col = list(range(project.periods + 1))
+        ws.write_column(row, col, period_col)
+        col += 1
 
+        # CASHFLOWS
+        for cashflow in project.get_cashflows():
+            cashflow_list = [cashflow.cashflow_at(n).amount for n in range(project.periods + 1)]
+            ws.write_column(row, col, cashflow_list, fin)
+            col += 1
+
+        # FEATURES - TODO
+        # Period NPV
+        # Cumulative NPV
+        # Period BCR
+        # etc...

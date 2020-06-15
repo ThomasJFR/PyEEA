@@ -26,5 +26,5 @@ print("Equivalent Uniform Cashflow of Project:", my_project.eucf(5))
 print("Benefit-to-Cost Ratio:", my_project.bcr())
 print("IRR:", my_project.irr())
 print("MIRR:", my_project.mirr())
-write_excel("test.xlsx", my_project, show_npv=True)
+write_excel("test.xlsx", my_project)
 
