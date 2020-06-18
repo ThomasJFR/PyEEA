@@ -187,9 +187,10 @@ class Project:
             raise NotImplementedError
         return self.npw().to_av(self.interest, n)
 
-    def irr(self):
+    def irr(self, return_all=False):
         # WARNING: This only gets one value of IRR, but there could be more than one...
-        return fsolve(lambda i: self.npw(i).amount, self.interest)[0]
+        irrs = fsolve(lambda i: self.npw(i).amount, self.interest)
+        return irrs if return_all is True else irrs[0]
 
     def mirr(self, e_inv=None, e_fin=None):
         ncfs = self.get_ncfs()
