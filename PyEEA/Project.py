@@ -188,7 +188,6 @@ class Project:
         return self.npw().to_av(self.interest, n)
 
     def irr(self, return_all=False):
-        # WARNING: This only gets one value of IRR, but there could be more than one...
         irrs = fsolve(lambda i: self.npw(i).amount, self.interest)
         return irrs if return_all is True else irrs[0]
 
