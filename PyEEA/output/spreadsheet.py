@@ -56,9 +56,7 @@ def write_excel(filename, project, features=[]):
 
         # TITLES
         cf_titles = [cf.get_title() for cf in project.get_cashflows()]
-        print(features)
         titles = ["Period", *cf_titles, *features]
-        print(titles)
         ws.write_row(row, 0, titles, bld)
         row += 1
 
