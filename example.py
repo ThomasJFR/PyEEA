@@ -6,9 +6,10 @@ from PyEEA.output import write_excel, SpreadsheetFeature as ssfs
 print("CASHFLOW STUFF")
 print("--------------")
 fv = sp.Future(1200, 2)
-print(fv @ 0)
-print(fv @ 1)
-print(fv @ 2)
+print(fv[0])
+print(fv[1])
+print(fv[2])
+print(fv[1:3])
 
 print("PROJECT STUFF")
 print("-------------")
@@ -28,3 +29,11 @@ print("IRR:", my_project.irr())
 print("MIRR:", my_project.mirr())
 write_excel("test.xlsx", my_project, [ssfs.NPW, ssfs.CNPW])
 
+""" QUIZ 
+p = Project(interest=0.10)
+p.add_cashflows([
+    sp.Present(-1000),
+    us.Annuity( 500, 5)
+])
+print(p.bcr())
+"""

@@ -47,7 +47,7 @@ class Project:
                 ]
             )
         ]
-        cfs = [[cf @ n for cf in cfs_in_period(n)] or [NullCashflow()] for n in ns]
+        cfs = [[cf[n] for cf in cfs_in_period(n)] or [NullCashflow()] for n in ns]
         return cfs[0] if len(cfs) == 1 else cfs
 
     def __add__(self, other):
@@ -151,7 +151,7 @@ class Project:
                 ncfs.append(sp.Present(0) if n == 0 else sp.Future(0, n))
                 continue
 
-            ncf = sum([cf @ n for cf in cfs]) or (
+            ncf = sum([cf[n] for cf in cfs]) or (
                 sp.Future(0, n) if n > 0 else sp.Present(0)
             )
             ncfs.append(ncf)
@@ -187,9 +187,9 @@ class Project:
             raise NotImplementedError
         return self.npw().to_av(self.interest, n)
 
-    def irr(self):
-        # WARNING: This only gets one value of IRR, but there could be more than one...
-        return fsolve(lambda i: self.npw(i).amount, self.interest)[0]
+    def irr(self, return_all=False):
+        irrs = fsolve(lambda i: self.npw(i).amount, self.interest)
+        return irrs if return_all is True else irrs[0]
 
     def mirr(self, e_inv=None, e_fin=None):
         ncfs = self.get_ncfs()

@@ -41,13 +41,23 @@ class Cashflow(ABC):
         else:
             return self.__add__(other)
 
-    def __matmul__(self, n):
+    def __getitem__(self, val):
         """
         Implemented so we can get the cashflow that occurs at period n as follows:
             my_cashflow @ 2
         For single payments, the value is zero unless the periods match
         """
-        return self.cashflow_at(n)
+        if type(val) == int:
+            ns = (val,)  # Get the cashflows in a period as an array
+        elif type(val) == tuple:
+            ns = val  # Get the cashflows of multiple periods as a 2D array
+        elif type(val) == slice:
+            start = val.start or 0
+            stop = (val.stop if val.stop else self.periods) + 1
+            step = val.step or 1
+            ns = range(start, stop, step)
+
+        return self.cashflow_at(ns)
     
     def set_title(self, title):
         self.title = title
@@ -70,7 +80,10 @@ class Cashflow(ABC):
         return valstr + infostr
 
     @abstractmethod
-    def cashflow_at(self, n):
+    def cashflow_at(self, ns):
+        """
+        Parameters: ns [tuple(int)] - The periods to get the cashflows at.
+        """
         pass
 
     @abstractmethod

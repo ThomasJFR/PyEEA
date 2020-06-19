@@ -28,15 +28,12 @@ class Future(Cashflow):
                 "Cannot add two Single cashflows occurring at different periods!"
             )
 
-    def cashflow_at(self, n):
-        if type(n) is not int:
-            raise ValueError(
-                "Argument n of the statement << Cashflow @ n >> must be a period!"
-            )
-        elif n == self.n:
-            return self
-        else:
-            return nu.NullCashflow()
+    def cashflow_at(self, ns):
+        cfs = [
+            self if n == self.n else nu.NullCashflow()
+            for n in ns
+        ]
+        return cfs[0] if len(cfs) == 1 else cfs
 
     def to_shorthand(self, alt=None):
         """
