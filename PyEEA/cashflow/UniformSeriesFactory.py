@@ -4,8 +4,8 @@ from . import NullCashflow as nu
 
 
 class Annuity(Cashflow):
-    def __init__(self, amount, d):
-        super().__init__(amount)
+    def __init__(self, amount, d, title=None):
+        super().__init__(amount, title)
         self.d = self.parse_d(d)  # The start and end period of the annuity
         self.D = self.d[1] - self.d[0]  # The number of periods for the annuity
 
@@ -95,8 +95,8 @@ class Annuity(Cashflow):
 
 
 class Gradient(Annuity):
-    def __init__(self, amount, d, G):
-        super().__init__(amount, d)
+    def __init__(self, amount, d, G, title=None):
+        super().__init__(amount, d, title=None)
         self.G = G
 
     def to_shorthand(self):
@@ -140,8 +140,8 @@ class Gradient(Annuity):
 
 
 class Geometric(Annuity):
-    def __init__(self, amount, d, g):
-        super().__init__(amount, d)
+    def __init__(self, amount, d, g, title=None):
+        super().__init__(amount, d, title)
         self.g = g
 
     def to_shorthand(self):
@@ -217,7 +217,7 @@ class Perpetuity(Cashflow):
 
 
 class GeoPerpetuity(Perpetuity):
-    def __init__(self, amount, g):
+    def __init__(self, amount, g, title=None):
         super().__init__(amount)
         self.g = g  # Geometric rate
 

@@ -19,7 +19,7 @@ class Project:
                                     cash flows within the project.
     """
 
-    def __init__(self, title="generator", interest=0.12):
+    def __init__(self, title=None, interest=0.12):
         self.title = title
         self.interest = interest
 
@@ -92,17 +92,22 @@ class Project:
     def set_title(self, title):
         self.title = title
 
+    def get_title(self):
+        return self.title or "Project with {} cashflows".format(len(self.cashflows))
+
     def set_interest(self, interest):
         self.interest = interest
 
-    """
-    Author: Thomas Richmond
-    Description: Adds a single cashflow to the project cashflow list.
-    Parameters: cf [Cashflow] - A cashflow object
-    Returns: The instance of Project, allowing for daisy-chaining
-    """
+    def get_cashflows(self):
+        return self.cashflows
 
     def add_cashflow(self, cf):
+        """
+        Author: Thomas Richmond
+        Description: Adds a single cashflow to the project cashflow list.
+        Parameters: cf [Cashflow] - A cashflow object
+        Returns: The instance of Project, allowing for daisy-chaining
+        """
         if type(cf) == sp.Present:
             pass
         elif type(cf) == sp.Future:
@@ -115,15 +120,14 @@ class Project:
         self.cashflows.append(cf)
         return self  # Daisy Chaining!
 
-    """
-    Author: Thomas Richmond
-    Description: Analogous in purpose to add_cashflow() above, but provides an alternate syntax
-    Parameters: cfs [iterable(Cashflow)] - An iterable of cashflows which are added to the list
-                                           of project cashflows.
-    Returns: The instance of Project, allowing for daisy-chaining
-    """
-
     def add_cashflows(self, cfs):
+        """
+        Author: Thomas Richmond
+        Description: Analogous in purpose to add_cashflow() above, but provides an alternate syntax
+        Parameters: cfs [iterable(Cashflow)] - An iterable of cashflows which are added to the list
+                                               of project cashflows.
+        Returns: The instance of Project, allowing for daisy-chaining
+        """
         for cf in cfs:
             self.add_cashflow(cf)
         return self

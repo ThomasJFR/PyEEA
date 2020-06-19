@@ -19,8 +19,12 @@ class Cashflow(ABC):
                                   (e.g. < amount * (P|F, i, n) >)
     """
 
-    def __init__(self, amount):
+    cashflow_id = 1  # Iterating counter used whenever a title isn't given
+
+    def __init__(self, amount, title=None):
         self.amount = amount
+        self.title = title or ("%s %i " % (self.get_name(), Cashflow.cashflow_id))
+        Cashflow.cashflow_id += 1
 
     def __str__(self):
         """
@@ -55,6 +59,12 @@ class Cashflow(ABC):
             ns = range(start, stop, step)
 
         return self.cashflow_at(ns)
+
+    def set_title(self, title):
+        self.title = title
+
+    def get_title(self):
+        return self.title
 
     def to_shorthand(self, info):
         # Step 1: Add the cash amount
