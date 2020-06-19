@@ -19,7 +19,7 @@ def write_csv(filename, project):
             for cf in project[n]:
                 for title in titles:
                     if cf.title == title:  # This can only happen once!
-                        nextrow.append(cf.cashflow_at(n).amount)
+                        nextrow.append(cf[n].amount)
                         break
                     else:
                         nextrow.append(0)
@@ -69,7 +69,7 @@ def write_excel(filename, project, features=[]):
 
         # CASHFLOWS
         for cashflow in project.get_cashflows():
-            cashflow_list = [cashflow.cashflow_at(n).amount for n in range(project.periods + 1)]
+            cashflow_list = [cashflow[n].amount for n in range(project.periods + 1)]
             ws.write_column(row, col, cashflow_list, fin)
             col += 1
 
