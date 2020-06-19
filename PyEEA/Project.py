@@ -91,23 +91,23 @@ class Project:
 
     def set_title(self, title):
         self.title = title
-    
+
     def get_title(self):
         return self.title or "Project with {} cashflows".format(len(self.cashflows))
-    
 
     def set_interest(self, interest):
         self.interest = interest
 
     def get_cashflows(self):
         return self.cashflows
-    def add_cashflow(self, cf): 
+
+    def add_cashflow(self, cf):
         """
         Author: Thomas Richmond
         Description: Adds a single cashflow to the project cashflow list.
         Parameters: cf [Cashflow] - A cashflow object
         Returns: The instance of Project, allowing for daisy-chaining
-        """       
+        """
         if type(cf) == sp.Present:
             pass
         elif type(cf) == sp.Future:

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from collections.abc import Iterable
 
+
 class PaymentScheme(Enum):
     ARREAR = "payment in arrear"
     DUE = "payment in due"
@@ -17,13 +18,13 @@ class Cashflow(ABC):
                                   characteristic interest factor of the cash flow.
                                   (e.g. < amount * (P|F, i, n) >)
     """
-    
+
     cashflow_id = 1  # Iterating counter used whenever a title isn't given
 
     def __init__(self, amount, title=None):
         self.amount = amount
         self.title = title or ("%s %i " % (self.get_name(), Cashflow.cashflow_id))
-        Cashflow.cashflow_id +=  1
+        Cashflow.cashflow_id += 1
 
     def __str__(self):
         """
@@ -58,10 +59,10 @@ class Cashflow(ABC):
             ns = range(start, stop, step)
 
         return self.cashflow_at(ns)
-    
+
     def set_title(self, title):
         self.title = title
-    
+
     def get_title(self):
         return self.title
 
