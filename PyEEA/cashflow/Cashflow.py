@@ -50,7 +50,7 @@ class Cashflow(ABC):
             ns = val  # Get the cashflows of multiple periods as a 2D array
         elif type(val) == slice:
             start = val.start or 0
-            stop = (val.stop if val.stop else self.periods) + 1
+            stop = val.stop + 1
             step = val.step or 1
             ns = range(start, stop, step)
 
