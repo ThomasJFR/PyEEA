@@ -14,12 +14,12 @@ print(fv[1:3])
 print("PROJECT STUFF")
 print("-------------")
 my_project = Project(interest=0.12)
-my_project                                \
-    .add_cashflow(sp.Present( 5000))      \
-    .add_cashflow(us.Annuity( 250, [2,5])) \
-    .add_cashflow( sp.Future(-600,  2))   \
-    .add_cashflow( sp.Future(-500,  3))   \
-    .add_cashflow( sp.Future(-100, 5))
+my_project                                                              \
+    .add_cashflow(sp.Present( 5000,         title="Initial Payment"))   \
+    .add_cashflow(us.Annuity( 250, [2,5],   title="Benefits"))          \
+    .add_cashflow( sp.Future(-600,  2,      title="Maintenance 1"))     \
+    .add_cashflow( sp.Future(-500,  3,      title="Maintenance 2"))     \
+    .add_cashflow( sp.Future(-100, 5,       title="Maintenance 3"))
 
 print([[str(cf) for cf in p] for p in my_project[:]])
 print("Net Present Worth:", my_project.npw())
