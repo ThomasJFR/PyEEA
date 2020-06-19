@@ -43,7 +43,7 @@ def write_excel(filename, project, features=[]):
         row, col = 0, 0
         
         # HEADER
-        ws.write(row, 0, project.title, bld)
+        ws.write(row, 0, project.get_title(), bld)
         row += 1
 
         ws.write(row, 0, "Interest", bld)
