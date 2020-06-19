@@ -36,6 +36,10 @@ write_excel("SPEP_Finances.xlsx", spep,
             features=[ssft.NPW, ssft.CNPW])
 ```
 
+The above code outputs the following spreadsheet:
+
+<img align='center' src='./assets/SampleSpreadsheetOutput.png' alt=''/>
+
 ## Installation
 
 For now, the library is local. Install this module locally to *site-packages* or a directory of your choice.
