@@ -47,7 +47,7 @@ class Project:
                 ]
             )
         ]
-        cfs = [[cf @ n for cf in cfs_in_period(n)] or [NullCashflow()] for n in ns]
+        cfs = [[cf[n] for cf in cfs_in_period(n)] or [NullCashflow()] for n in ns]
         return cfs[0] if len(cfs) == 1 else cfs
 
     def __add__(self, other):
@@ -151,7 +151,7 @@ class Project:
                 ncfs.append(sp.Present(0) if n == 0 else sp.Future(0, n))
                 continue
 
-            ncf = sum([cf @ n for cf in cfs]) or (
+            ncf = sum([cf[n] for cf in cfs]) or (
                 sp.Future(0, n) if n > 0 else sp.Present(0)
             )
             ncfs.append(ncf)

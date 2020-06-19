@@ -9,11 +9,14 @@ class Annuity(Cashflow):
         self.d = self.parse_d(d)  # The start and end period of the annuity
         self.D = self.d[1] - self.d[0]  # The number of periods for the annuity
 
-    def cashflow_at(self, n):
-        if n in range(self.d[0] + 1, self.d[1] + 1):
-            return sp.Future(self.amount, n) if n > 0 else sp.Present(self.amount)
-        else:
-            return nu.NullCashflow()
+    def cashflow_at(self, ns):
+        cfs = []
+        for n in ns:
+            if n in range(self.d[0] + 1, self.d[1] + 1):
+                cfs.append(sp.Future(self.amount, n))
+            else:
+                cfs.append(nu.NullCashflow())
+        return cfs[0] if len(cfs) == 1 else cfs
 
     def to_shorthand(self, alt=None):
         """
@@ -99,12 +102,15 @@ class Gradient(Annuity):
     def to_shorthand(self):
         return super().to_shorthand(("G", self.d, self.G))
 
-    def cashflow_at(self, n):
-        if n in range(self.d[0] + 1, self.d[1] + 1):
-            fv = self.amount + self.G * (n - self.d[0] - 1)
-            return sp.Future(fv, n)
-        else:
-            return nu.NullCashflow()
+    def cashflow_at(self, ns):
+        cfs = []
+        for n in ns:
+            if n in range(self.d[0] + 1, self.d[1] + 1):
+                fv = self.amount + self.G * (n - self.d[0] - 1)
+                cfs.append(sp.Future(fv, n))
+            else:
+                cfs.append(nu.NullCashflow())
+        return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):
         pv1 = (
@@ -141,12 +147,15 @@ class Geometric(Annuity):
     def to_shorthand(self):
         return super().to_shorthand(("g", self.d, str(self.g * 100) + "%"))
 
-    def cashflow_at(self, n):
-        if n in range(self.d[0] + 1, self.d[1] + 1):
-            fv = self.amount * (1 + g) ** (n - self.d[0] - 1)
-            return sp.Future(fv, n)
-        else:
-            return nu.NullCashflow()
+    def cashflow_at(self, ns):
+        cfs = []
+        for n in ns:
+            if n in range(self.d[0] + 1, self.d[1] + 1):
+                fv = self.amount * (1 + g) ** (n - self.d[0] - 1)
+                cfs.append(sp.Future(fv, n))
+            else:
+                cfs.append(nu.NullCashflow()) 
+        return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):
         if i == self.g:
@@ -190,7 +199,7 @@ class Geometric(Annuity):
 
 class Perpetuity(Cashflow):
     # TODO Need to implement support for starting at n > 0
-
+    # TODO Need to implement indexing
     def to_shorthand(self, alt=None):
         return super().to_shorthand(alt or ("A", "inf"))
 
