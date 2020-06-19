@@ -19,16 +19,16 @@ spep.add_cashflows([
     sp.Present( -50000,        title="New Panel Cost"),
     sp.Present( -6000,         title="Installation Cost"),
     us.Gradient(-1500, 30, 50, title="Maintenance Cost"),
-    us.Annuity(  5000, 30,     title="Annual Benefits"),
+    us.Annuity(  5000, 30,     title="Annual Benefits"),    
     sp.Future(   10000, 30,    title="Salvage Value")
 ])
 
 # Valuate our project
 print("PROJECT VALUATIONS:")
-print("\tNet Present Worth:", spep.npw())
-print("\tBenefit-Cost Ratio:", spep.bcr())
-print("\tInternal Rate of Return:", spep.irr())
-print("\tModified IRR:", spep.mirr())
+print("\tNet Present Worth:", spep.npw())        # -$18,578.88(P)
+print("\tBenefit-Cost Ratio:", spep.bcr())       # 0.71971860...
+print("\tInternal Rate of Return:", spep.irr())  # 0.06153851...
+print("\tModified IRR:", spep.mirr())            # 0.08531792...
 
 # Export our project as an Excel file
 from PyEEA.output import write_excel, SpreadsheetFeature as ssft
