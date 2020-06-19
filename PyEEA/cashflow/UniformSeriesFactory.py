@@ -154,7 +154,7 @@ class Geometric(Annuity):
                 fv = self.amount * (1 + g) ** (n - self.d[0] - 1)
                 cfs.append(sp.Future(fv, n))
             else:
-                cfs.append(nu.NullCashflow()) 
+                cfs.append(nu.NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):

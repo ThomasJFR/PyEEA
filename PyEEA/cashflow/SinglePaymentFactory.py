@@ -29,10 +29,7 @@ class Future(Cashflow):
             )
 
     def cashflow_at(self, ns):
-        cfs = [
-            self if n == self.n else nu.NullCashflow()
-            for n in ns
-        ]
+        cfs = [self if n == self.n else nu.NullCashflow() for n in ns]
         return cfs[0] if len(cfs) == 1 else cfs
 
     def to_shorthand(self, alt=None):
