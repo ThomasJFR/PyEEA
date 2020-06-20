@@ -1,4 +1,5 @@
 from ..cashflow import SinglePaymentFactory as sp
+from ..cashflow import UniformSeriesFactory as us
 from enum import Enum
 
 
@@ -69,6 +70,8 @@ def write_excel(filename, project, features=[]):
         for cashflow in project.get_cashflows():
             cashflow_list = [cashflow[n].amount for n in range(project.periods + 1)]
             ws.write_column(row, col, cashflow_list, fin)
+            if isinstance(cashflow, us.Perpetuity):
+                ws.write(row + len(cashflow_list), col, "...")
             col += 1
 
         # FEATURES
