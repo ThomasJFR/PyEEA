@@ -18,9 +18,9 @@ from PyEEA import UniformSeriesFactory as us
 spep.add_cashflows([
     sp.Present( -50000,        title="New Panel Cost"),
     sp.Present( -6000,         title="Installation Cost"),
-    us.Gradient(-1500, 30, 50, title="Maintenance Cost"),
-    us.Annuity(  5000, 30,     title="Annual Benefits"),    
-    sp.Future(   10000, 30,    title="Salvage Value")
+    us.Gradient(-1500, 50, 30, title="Maintenance Cost"),
+    us.Annuity(  5000,     30, title="Annual Benefits"),    
+    sp.Future(   10000,    30, title="Salvage Value")
 ])
 
 # Valuate our project
