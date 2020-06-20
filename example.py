@@ -25,7 +25,7 @@ my_project                                                              \
 
 print([[str(cf) for cf in p] for p in my_project[:]])
 print("Net Present Worth:", my_project.npw())
-print("Equivalent Uniform Cashflow of Project:", my_project.eucf(5))
+print("Equivalent Uniform Cashflow of Project:", my_project.eacf(5))
 print("Benefit-to-Cost Ratio:", my_project.bcr())
 print("IRR:", my_project.irr())
 print("MIRR:", my_project.mirr())
