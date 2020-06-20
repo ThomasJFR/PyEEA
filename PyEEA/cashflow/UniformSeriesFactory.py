@@ -96,7 +96,7 @@ class Annuity(Cashflow):
 
 class Gradient(Annuity):
     def __init__(self, amount, G, d, title=None):
-        super().__init__(amount, d, title=None)
+        super().__init__(amount, d, title)
         self.G = G
 
     def to_shorthand(self):
