@@ -39,7 +39,8 @@ class Future(Cashflow):
         return super().to_shorthand(alt or ("F", self.n))
 
     def to_pv(self, i):
-        return Present(self.amount * (1 + i) ** (-self.n))
+        present_worth_factor = (1 + i) ** -self.n
+        return Present(self.amount * present_worth_factor)
 
     def to_fv(self, i, n):
         if self.n == n:
@@ -78,7 +79,8 @@ class Present(Future):
         return self
 
     def to_fv(self, i, n):
-        return Future(self.amount * (1 + i) ** n, n)
+        compound_amount_factor = (1 + i) ** n
+        return Future(self.amount * compound_amount_factor, n)
 
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = us.Annuity.parse_d(d)
