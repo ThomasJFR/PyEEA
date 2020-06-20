@@ -12,7 +12,7 @@ class Annuity(Cashflow):
     def cashflow_at(self, ns):
         cfs = []
         for n in ns:
-            if self.d[0] < n < self.d[1]: 
+            if self.d[0] < n <= self.d[1]: 
                 cfs.append(sp.Future(self.amount, n))
             else:
                 cfs.append(nu.NullCashflow())
@@ -105,7 +105,7 @@ class Gradient(Annuity):
     def cashflow_at(self, ns):
         cfs = []
         for n in ns:
-            if self.d[0] < n < self.d[1]:
+            if self.d[0] < n <= self.d[1]:
                 fv = self.amount + self.G * (n - self.d[0] - 1)
                 cfs.append(sp.Future(fv, n))
             else:
@@ -150,7 +150,7 @@ class Geometric(Annuity):
     def cashflow_at(self, ns):
         cfs = []
         for n in ns:
-            if self.d[0] < n < self.d[1]:
+            if self.d[0] < n <= self.d[1]:
                 fv = self.amount * (1 + g) ** (n - self.d[0] - 1)
                 cfs.append(sp.Future(fv, n))
             else:
