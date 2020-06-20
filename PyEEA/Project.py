@@ -187,10 +187,9 @@ class Project:
 
         return abs(pvb.amount / pvc.amount)
 
-    def eucf(self, n=None):
-        if n == None:
-            raise NotImplementedError
-        return self.npw().to_av(self.interest, n)
+    def eacf(self, d=None):
+        d = us.Annuity.parse_d(d or self.periods)
+        return self.npw().to_av(self.interest, d)
 
     def irr(self, return_all=False):
         irrs = fsolve(lambda i: self.npw(i).amount, self.interest)
