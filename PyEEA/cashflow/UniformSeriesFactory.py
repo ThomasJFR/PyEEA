@@ -95,7 +95,7 @@ class Annuity(Cashflow):
 
 
 class Gradient(Annuity):
-    def __init__(self, amount, d, G, title=None):
+    def __init__(self, amount, G, d, title=None):
         super().__init__(amount, d, title=None)
         self.G = G
 
@@ -140,7 +140,7 @@ class Gradient(Annuity):
 
 
 class Geometric(Annuity):
-    def __init__(self, amount, d, g, title=None):
+    def __init__(self, amount, g, d, title=None):
         super().__init__(amount, d, title)
         self.g = g
 
@@ -198,53 +198,65 @@ class Geometric(Annuity):
 
 
 class Perpetuity(Cashflow):
-    # TODO Need to implement support for starting at n > 0
-    # TODO Need to implement indexing
-    def to_shorthand(self, alt=None):
-        return super().to_shorthand(alt or ("A", "inf"))
+    def __init__(self, amount, d0=0, title=None):
+        super().__init__(amount, title)
+        if type(d0) is not int:
+            raise TypeError("Parameter d0 must be an integer!")
+        self.d0 = d0
 
-    def cashflow_at(self, n):
-        return sp.Future(self.amount, n)
+    def to_shorthand(self, alt=None):
+        return super().to_shorthand(alt or ("A", "[{}, inf]".format(self.d0)))
+
+    def cashflow_at(self, ns):
+        cfs = []
+        for n in ns:
+            if n > self.d0:
+                cfs.append(sp.Future(self.amount, n))
+            else:
+                cfs.append(nu.NullCashflow())
+        return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):
-        return sp.Present(self.amount / i)
+        xv = self.amount / i
+        if self.d0 > 0:
+            return sp.Future(xv, self.d0).to_pv(i)
+        else:
+            return sp.Present(xv)
 
     def to_fv(self, i, n):
         return self.to_pv(i).to_fv(i, n)
 
-    def to_av(self, i, n):
-        return self.to_pv(i).to_av(i, n)
+    def to_av(self, i, d):
+        return self.to_pv(i).to_av(i, d)
 
 
 class GeoPerpetuity(Perpetuity):
-    def __init__(self, amount, g, title=None):
-        super().__init__(amount)
+    def __init__(self, amount, g, d0=0, title=None):
+        super().__init__(amount, d0, title)
         self.g = g  # Geometric rate
 
     def to_shorthand(self):
-        return super().to_shorthand(("g", "inf", str(self.g * 100) + "%"))
+        return super().to_shorthand(("g", "[{}, inf]".format(self.d0), str(self.g * 100) + "%"))
 
-    def cashflow_at(self, n):
-        if n in range(self.d[0] + 1, self.d[1] + 1):  # TODO Fix
-            fv = self.amount * (1 + g) ** (n - 1)
-            return sp.Future(fv, n)
-        else:
-            return nu.NullCashflow()
+    def cashflow_at(self, ns):
+        cfs = []
+        for n in ns:
+            if n > self.d0: 
+                fv = self.amount * (1 + self.g) ** (n - self.d0 - 1)
+                cfs.append(sp.Future(fv, n))
+            else:
+                cfs.append(nu.NullCashflow())
+        return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):
         if i <= self.g:
             raise ValueError(
                 "Geometric Perpetuity rate (g) must be greater than the interest rate (i)!"
             )
-        return sp.Present(self.amount / (i - g))
 
-    def to_fv(self, i, n):
-        return self.to_pv(i).to_fv(i, n)
+        xv = self.amount / (i - self.g)
+        if self.d0 > 0:
+            return sp.Future(xv, n)
+        else:
+            return sp.Present(xv)
 
-    def to_av(self, i, n, scheme=ps.ARREAR):
-        av = self.to_pv(i).tO_av(
-            i, n
-        )  # TODO This isn't a complete implementation; it only considers n starting at 1
-
-
-# TODO add more stuff...
