@@ -236,12 +236,14 @@ class GeoPerpetuity(Perpetuity):
         self.g = g  # Geometric rate
 
     def to_shorthand(self):
-        return super().to_shorthand(("g", "[{}, inf]".format(self.d0), str(self.g * 100) + "%"))
+        return super().to_shorthand(
+            ("g", "[{}, inf]".format(self.d0), str(self.g * 100) + "%")
+        )
 
     def cashflow_at(self, ns):
         cfs = []
         for n in ns:
-            if n > self.d0: 
+            if n > self.d0:
                 fv = self.amount * (1 + self.g) ** (n - self.d0 - 1)
                 cfs.append(sp.Future(fv, n))
             else:
@@ -259,4 +261,3 @@ class GeoPerpetuity(Perpetuity):
             return sp.Future(xv, n)
         else:
             return sp.Present(xv)
-
