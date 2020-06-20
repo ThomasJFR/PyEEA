@@ -164,12 +164,15 @@ class Project:
         return ncfs
 
     def npw(self, i=None):
-        if self.interest == None and i == None:
+        if i is None and self.interest is None:
             raise ValueError(
                 "No interest provided for npw calculations.\nDid you mean to use set_interest(i)?"
             )
 
         return sum([cf.to_pv(i or self.interest) for cf in self.cashflows])
+
+    def nfw(self, n, i=None):
+        return self.npw().to_fv(i or self.interest, n)
 
     def bcr(self, i=None):
         if self.interest == None and i == None:
