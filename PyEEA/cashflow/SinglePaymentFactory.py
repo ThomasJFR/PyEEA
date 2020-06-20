@@ -86,7 +86,7 @@ class Present(Future):
         d = us.Annuity.parse_d(d)
         D = d[1] - d[0] + 1
 
-        capital_recovery_factor = ((i * (1 + i) ** D) / ((1 + i) ** D) - 1)
+        capital_recovery_factor = ((i * (1 + i) ** D) / ((1 + i) ** D - 1))
         if d[0] == 0:
             av = self.amount * capital_recovery_factor
             return us.Annuity(av, d)
