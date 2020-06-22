@@ -195,7 +195,7 @@ class Project:
         return self.npw().to_av(self.interest, d)
 
     def irr(self, return_all=False):
-        irrs = fsolve(lambda i: self.npw(i).amount, self.interest)
+        irrs = fsolve(self.npw(i).amount, self.interest, factor=0.1)
         return irrs if return_all is True else irrs[0]
 
     def mirr(self, e_inv=None, e_fin=None):
@@ -212,7 +212,7 @@ class Project:
             [ncf.to_pv(e_inv or self.interest) for ncf in ncfs if ncf.amount < 0]
         ) or sp.Present(0)
 
-        return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self.interest)[0]
+        return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self.interest, factor=0.1)[0]
 
     def describe():
         pass
