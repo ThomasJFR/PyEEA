@@ -43,7 +43,7 @@ class Project:
             if any(
                 [
                     isinstance(cf, sp.Future) and n == cf.n,
-                    isinstance(cf, us.Annuity) and cf.d[0] < n < cf.d[1],
+                    isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
                     isinstance(cf, us.Perpetuity) and n > cf.d0,
                 ]
             )
