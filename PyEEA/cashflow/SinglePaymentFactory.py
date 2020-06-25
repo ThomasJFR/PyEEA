@@ -92,5 +92,5 @@ class Present(Future):
             return us.Annuity(av, d)
         else:  # We must get the "Future Present Value" and use that to compute
             # the value of our annuity.
-            av = self.to_fv(i, d[0]).amount * capital_recovery_factory
+            av = self.to_fv(i, d[0]).amount * capital_recovery_factor
             return us.Annuity(av, d)
