@@ -163,6 +163,18 @@ class Project:
 
         return ncfs
 
+    def pbp(self):
+        """
+        Purpose: Get the payback period for the project.
+                 Does not account for time value of money.
+        """
+        cfsum = 0
+        for n in range(self.periods + 1):
+            cfsum += sum(cf.amount for cf in self[n])
+            if cfsum > 0:
+                return n
+        return -1
+
     def npw(self, i=None):
         if i is None and self.interest is None:
             raise ValueError(
@@ -195,7 +207,7 @@ class Project:
         return self.npw().to_av(self.interest, d)
 
     def irr(self, return_all=False):
-        irrs = fsolve(self.npw(i).amount, self.interest, factor=0.1)
+        irrs = fsolve(lambda i: self.npw(i).amount, self.interest, factor=0.1)
         return irrs if return_all is True else irrs[0]
 
     def mirr(self, e_inv=None, e_fin=None):
