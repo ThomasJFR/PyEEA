@@ -133,7 +133,7 @@ class Gradient(Annuity):
         D = d[1] - d[0] + 1
 
         if d == self.d and d[0] == 0:  # Use standard formula
-            A_eq = G * (1 / i - D / ((1 + i) ** n - 1))
+            A_eq = self.amount + G * (1 / i - D / ((1 + i) ** n - 1))
             return Annuity(A_eq)
         else:
             return self.to_pv(i).to_av(i, d)
