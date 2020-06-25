@@ -50,7 +50,7 @@ class Future(Cashflow):
 
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = us.Annuity.parse_d(d)
-        D = d[1] - d[0] + 1
+        D = d[1] - d[0]
         
         sinking_fund_factor = i / ((1 + i) ** D - 1)
         if d[0] == 0:
@@ -84,7 +84,7 @@ class Present(Future):
 
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = us.Annuity.parse_d(d)
-        D = d[1] - d[0] + 1
+        D = d[1] - d[0]
 
         capital_recovery_factor = ((i * (1 + i) ** D) / ((1 + i) ** D - 1))
         if d[0] == 0:

@@ -48,7 +48,7 @@ class Annuity(Cashflow):
 
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = self.parse_d(d)
-        D = d[1] - d[0] + 1
+        D = d[1] - d[0]
 
         if d == self.d:  # The requested annuity is equivalent to this instance
             return self
@@ -130,7 +130,7 @@ class Gradient(Annuity):
 
     def to_av(self, i, d):
         d = self.parse_d(d)
-        D = d[1] - d[0] + 1
+        D = d[1] - d[0]
 
         if d == self.d and d[0] == 0:  # Use standard formula
             A_eq = self.amount + G * (1 / i - D / ((1 + i) ** n - 1))
