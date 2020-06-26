@@ -25,7 +25,11 @@ class Annuity(Cashflow):
         return super().to_shorthand(alt or ("A", self.d))
 
     def to_pv(self, i):
-        pv = self.amount * ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D)
+        if i == 0:
+            pv = self.amount * self.D
+        else:
+            present_worth_factor = ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D)
+            pv = self.amount * present_worth_factor
 
         if self.d[0] == 0:  # PV is correct
             return sp.Present(pv)
@@ -168,7 +172,7 @@ class Geometric(Annuity):
         elif i > self.g:
             xv = (
                 self.amount
-                * (1 - (1 + self.g) ** self.D * (1 + self.g) ** -self.D)
+                * (1 - (1 + self.g) ** self.D * (1 + i) ** -self.D)
                 / (i - self.g)
             )
 
