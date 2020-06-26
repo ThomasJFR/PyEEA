@@ -19,7 +19,7 @@ class Project:
                                     cash flows within the project.
     """
 
-    def __init__(self, title=None, interest=0.12):
+    def __init__(self, title=None, interest=0):
         self.title = title
         self.interest = interest
 
