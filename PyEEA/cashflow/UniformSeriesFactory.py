@@ -59,8 +59,6 @@ class Annuity(Cashflow):
         else:
             return self.to_pv(i).to_av(i, d)
 
-    @classmethod
-
 class Gradient(Annuity):
     def __init__(self, amount, G, d, title=None):
         super().__init__(amount, d, title)
