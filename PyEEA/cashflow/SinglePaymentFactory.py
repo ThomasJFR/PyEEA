@@ -1,7 +1,7 @@
 from .Cashflow import Cashflow, PaymentScheme as ps
 from . import UniformSeriesFactory as us
 from . import NullCashflow as nu
-
+from .utilities import parse_d
 
 class Future(Cashflow):
     """
@@ -83,7 +83,7 @@ class Present(Future):
         return Future(self.amount * compound_amount_factor, n)
 
     def to_av(self, i, d, scheme=ps.ARREAR):
-        d = us.Annuity.parse_d(d)
+        d = parse_d(d)
         D = d[1] - d[0]
 
         capital_recovery_factor = ((i * (1 + i) ** D) / ((1 + i) ** D - 1))

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 from collections.abc import Iterable
-
+from .utilities import parse_ns
 
 class PaymentScheme(Enum):
     ARREAR = "payment in arrear"
@@ -48,16 +48,7 @@ class Cashflow(ABC):
             my_cashflow @ 2
         For single payments, the value is zero unless the periods match
         """
-        if type(val) == int:
-            ns = (val,)  # Get the cashflows in a period as an array
-        elif type(val) == tuple:
-            ns = val  # Get the cashflows of multiple periods as a 2D array
-        elif type(val) == slice:
-            start = val.start or 0
-            stop = val.stop + 1
-            step = val.step or 1
-            ns = range(start, stop, step)
-
+        ns = parse_ns(val)
         return self.cashflow_at(ns)
 
     def set_title(self, title):
@@ -100,5 +91,5 @@ class Cashflow(ABC):
         pass
 
     @classmethod
-    def get_name(cls):
+    def wname(cls):
         return cls.__name__
