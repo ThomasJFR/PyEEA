@@ -37,8 +37,8 @@ def parse_d(d):
             + "must be whole number or list of whole numbers"
         )
 
-def parse_ns():
-   if type(val) == int:
+def parse_ns(val):
+    if type(val) == int:
         ns = (val,)  # Get the cashflows in a period as an array
     elif type(val) == tuple:
         ns = val  # Get the cashflows of multiple periods as a 2D array
@@ -48,5 +48,5 @@ def parse_ns():
         step = val.step or 1
         ns = range(start, stop, step)
 
-  
+    return ns  
 
