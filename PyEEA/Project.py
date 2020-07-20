@@ -1,7 +1,8 @@
 from scipy.optimize import fsolve
 from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
-from .cashflow import NullCashflow
+from .cashflow import DepreciationHelper as dh
+from .cashflow import Cashflow, NullCashflow
 
 
 class Project:
@@ -45,6 +46,7 @@ class Project:
                     isinstance(cf, sp.Future) and n == cf.n,
                     isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
                     isinstance(cf, us.Perpetuity) and n > cf.d0,
+                    isinstance(cf, dh.Depreciation) and cf.d[0] < n <= cf.d[1],
                 ]
             )
         ]
@@ -117,7 +119,9 @@ class Project:
         elif isinstance(cf, us.Annuity):
             if cf.d[1] > self.periods:
                 self.periods = cf.d[1]
-
+        elif isinstance(cf, dh.Depreciation):
+            if cf.d[1] > self.periods:
+                self.periods = cf.d[1]
         self.cashflows.append(cf)
         return self  # Daisy Chaining!
 
@@ -131,6 +135,7 @@ class Project:
         """
         for cf in cfs:
             self.add_cashflow(cf)
+            
         return self
 
     def revenues(self):
