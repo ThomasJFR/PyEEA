@@ -1,6 +1,5 @@
-from .Cashflow import Cashflow, PaymentScheme as ps
+from .Cashflow import Cashflow, NullCashflow, PaymentScheme as ps
 from . import UniformSeriesFactory as us
-from . import NullCashflow as nu
 from .utilities import parse_d
 
 class Future(Cashflow):
@@ -29,7 +28,7 @@ class Future(Cashflow):
             )
 
     def cashflow_at(self, ns):
-        cfs = [self if n == self.n else nu.NullCashflow() for n in ns]
+        cfs = [self if n == self.n else NullCashflow() for n in ns]
         return cfs[0] if len(cfs) == 1 else cfs
 
     def to_shorthand(self, alt=None):

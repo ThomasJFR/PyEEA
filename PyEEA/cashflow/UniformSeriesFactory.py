@@ -1,6 +1,5 @@
-from .Cashflow import Cashflow, PaymentScheme as ps
+from .Cashflow import Cashflow, NullCashflow, PaymentScheme as ps
 from . import SinglePaymentFactory as sp
-from . import NullCashflow as nu
 from .utilities import parse_d
 
 class Annuity(Cashflow):
@@ -15,7 +14,7 @@ class Annuity(Cashflow):
             if self.d[0] < n <= self.d[1]: 
                 cfs.append(sp.Future(self.amount, n))
             else:
-                cfs.append(nu.NullCashflow())
+                cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
 
     def to_shorthand(self, alt=None):
@@ -74,7 +73,7 @@ class Gradient(Annuity):
                 fv = self.amount + self.G * (n - self.d[0] - 1)
                 cfs.append(sp.Future(fv, n))
             else:
-                cfs.append(nu.NullCashflow())
+                cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):
@@ -119,7 +118,7 @@ class Geometric(Annuity):
                 fv = self.amount * (1 + g) ** (n - self.d[0] - 1)
                 cfs.append(sp.Future(fv, n))
             else:
-                cfs.append(nu.NullCashflow())
+                cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):
@@ -178,7 +177,7 @@ class Perpetuity(Cashflow):
             if n > self.d0:
                 cfs.append(sp.Future(self.amount, n))
             else:
-                cfs.append(nu.NullCashflow())
+                cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):
@@ -212,7 +211,7 @@ class GeoPerpetuity(Perpetuity):
                 fv = self.amount * (1 + self.g) ** (n - self.d0 - 1)
                 cfs.append(sp.Future(fv, n))
             else:
-                cfs.append(nu.NullCashflow())
+                cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):
