@@ -45,14 +45,18 @@ class Depreciation(ABC):
         """
         Parameters: ns [tuple(int)] - The periods to get the cashflows at.
         """
-        cfs = []
-        for n in ns:
-            if self.d[0] < n <= self.d[1]:
-                val = (B - S / D)
-                cfs.append(sp.Future(self.amount, n))
-            else:
-                cfs.append(NullCashflow())
-        return cfs[0] if len(cfs) == 1 else cfs
+        pass
+
+    def to_pv(self, i):
+        xv = sum(self.cashflows)
+        return xv.to_pv(i)
+
+    def to_fv(self, i, n):
+        xv = sum(self.cashflows)
+        return xv.to_fv(i, n)
+
+    def to_av(self, i, d):
+        return self.to_pv(i).to_av(i, d)
 
 class StraightLine(Depreciation):
     def __init__(self, d, cashflows, salvage=0, title=None):
