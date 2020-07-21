@@ -144,6 +144,14 @@ class Project:
     def costs(self):
         return [cf for cf in self.cashflows if cf.amount < 0]
 
+    def to_dataframe(self, n=None):
+        import pandas as pd
+        periods = list(range(n or self.periods + 1))
+        titles = [cf.get_title() for cf in self.cashflows]
+        cashflows = [[cf[n] for cf in self.cashflows] for n in periods]
+        
+        return pd.DataFrame(cashflows, index=periods, columns=titles)
+
     #################################
     ### PROJECT VALUATION FUNCTIONS
     ###
