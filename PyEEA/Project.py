@@ -223,13 +223,17 @@ class Project:
                 "No interest provided for bcr calculations. \nDid you mean to use set_interest(i)?"
             )
 
-        pvb = sum([r.to_pv(i or self.interest) for r in self.revenues()]) or sp.Present(
-            0
-        )
-        pvc = sum([c.to_pv(i or self.interest) for c in self.costs()]) or sp.Present(0)
-
-        if pvc == 0:
-            raise ArithmeticError("No costs in project; B/C is infinite!")
+        pvb, pvc = 0, 0
+        for n in range(self.periods + 1):
+            for cf in self[n]:
+                amt = cf.to_pv(i or self.interest).amount
+                if amt > 0:
+                    pvb += amt
+                else:
+                    pvc += amt
+        
+        if pvb == 0 or pvc == 0:
+            return 0
 
         return abs(pvb.amount / pvc.amount)
 
