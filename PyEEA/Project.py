@@ -139,14 +139,32 @@ class Project:
         return self
 
     def revenues(self):
-        return [cf for cf in self.cashflows if cf.amount > 0]
+        revenues = []
+        for cf in self.cashflows:
+            if isinstance(cf, Cashflow):
+                if cf.amount > 0:
+                    revenues.append(cf)
+            if isinstance(cf, dh.Depreciation):
+                if cf.base > 0:
+                    revenues.append(cf)
+        
+        return revenues
 
     def costs(self):
-        return [cf for cf in self.cashflows if cf.amount < 0]
+        costs = []
+        for cf in self.cashflows:
+            if isinstance(cf, Cashflow):
+                if cf.amount < 0:
+                    costs.append(cf)
+            if isinstance(cf, dh.Depreciation):
+                if cf.base < 0:
+                    costs.append(cf)
+        
+        return costs 
 
     def to_dataframe(self, n=None):
         import pandas as pd
-        periods = list(range((n + 1) or (self.periods + 1)))
+        periods = list(range((n or self.periods) + 1))
         titles = [cf.get_title() for cf in self.cashflows]
         cashflows = [[cf[n] for cf in self.cashflows] for n in periods]
         
