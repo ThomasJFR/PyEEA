@@ -146,7 +146,7 @@ class Project:
 
     def to_dataframe(self, n=None):
         import pandas as pd
-        periods = list(range(n or self.periods + 1))
+        periods = list(range((n + 1) or (self.periods + 1)))
         titles = [cf.get_title() for cf in self.cashflows]
         cashflows = [[cf[n] for cf in self.cashflows] for n in periods]
         
