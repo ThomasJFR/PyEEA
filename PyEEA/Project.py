@@ -170,6 +170,24 @@ class Project:
         
         return pd.DataFrame(cashflows, index=periods, columns=titles)
 
+    def to_cashflowdiagram(self, n=None, size=None):
+        import pandas as pd
+        from matplotlib import pyplot as plt
+
+        periods = list(range((n or self.periods) + 1))
+        titles = [cf.get_title() for cf in self.cashflows]
+        cashflows = [[cf[n].amount for cf in self.cashflows] for n in periods]
+        
+        plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
+        plotdata.plot(kind='bar', stacked='true')
+        plt.title(self.get_title())
+        plt.ylabel("USD")
+        plt.xlabel("Period")
+
+        if size:
+            fig = plt.gcf()
+            fig.set_size_inches(size)
+
     #################################
     ### PROJECT VALUATION FUNCTIONS
     ###
