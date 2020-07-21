@@ -40,6 +40,14 @@ class Depreciation(ABC):
         ns = parse_ns(val)
         return self.cashflow_at(ns)
 
+
+    def set_title(self, title):
+        self.title = title
+
+    def get_title(self):
+        return self.title
+
+
     @abstractmethod
     def cashflow_at(self, ns):
         """
