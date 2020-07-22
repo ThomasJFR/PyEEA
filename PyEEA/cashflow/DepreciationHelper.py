@@ -69,7 +69,7 @@ class Depreciation(ABC):
 class StraightLine(Depreciation):
     def __init__(self, d, cashflows, salvage=0, title=None):
         super().__init__(d, cashflows, salvage, title)
-        self.annual_expense = (self.base - self.salvage) / N
+        self.annual_expense = (self.base - self.salvage) / self.N
 
     def cashflow_at(self, ns):
         """
@@ -77,9 +77,8 @@ class StraightLine(Depreciation):
         """
         cfs = []
         for n in ns:
-            if self.d[0] < n <= self.d[1]:        
-                remaining = self.base - annual_expense * (n - self.d[0])
-                cfs.append(sp.Future(remaining, n))
+            if self.d[0] < n <= self.d[1]:
+                cfs.append(sp.Future(self.annual_expense, n))
             else:
                 cfs.append(NullCashflow())
         
