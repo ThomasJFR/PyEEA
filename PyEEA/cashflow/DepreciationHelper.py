@@ -69,7 +69,7 @@ class Depreciation(ABC):
 class StraightLine(Depreciation):
     def __init__(self, d, cashflows, salvage=0, title=None):
         super().__init__(d, cashflows, salvage, title)
-        self.annual_expense = (self.base - self.salvage) / self.N
+        self.annual_expense = (self.base - self.salvage) / self.D
 
     def cashflow_at(self, ns):
         """
