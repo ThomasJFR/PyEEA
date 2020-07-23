@@ -3,7 +3,7 @@ from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
 from .cashflow import DepreciationHelper as dh
 from .cashflow import Cashflow, NullCashflow
-
+from .cashflow.utilities import parse_d
 
 class Project:
     """
@@ -256,7 +256,7 @@ class Project:
         return abs(pvb.amount / pvc.amount)
 
     def eacf(self, d=None):
-        d = us.Annuity.parse_d(d or self.periods)
+        d = parse_d(d or self.periods)
         return self.npw().to_av(self.interest, d)
 
     def irr(self, return_all=False):
