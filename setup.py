@@ -11,9 +11,9 @@ setup(
   download_url = 'https://github.com/ThomasJFR/PyEEA/archive/v0.1.1.tar.gz',
   keywords = ['Engineering', 'Economic', 'Analysis', 'Finance'],
   install_requires = [
-    scipy,
-    pandas,
-    matplotlib
+    'scipy',
+    'pandas',
+    'matplotlib'
   ],
   classifiers=[
     'Development Status :: 3 - Alpha',
