@@ -92,6 +92,15 @@ class Project:
         else:
             return self.npw() >= them.npw()
 
+    def __enter__(self):
+        from copy import deepcopy
+        self.cashflows_copy = deepcopy(self.cashflows)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.cashflows = self.cashflows_copy
+        del self.cashflows_copy
+
     def set_title(self, title):
         self.title = title
 
