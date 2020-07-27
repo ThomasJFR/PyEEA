@@ -47,7 +47,7 @@ class Project:
                     isinstance(cf, sp.Future) and n == cf.n,
                     isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
                     isinstance(cf, us.Perpetuity) and n > cf.d0,
-                    isinstance(cf, dh.Depreciation) and cf.d[0] < n <= cf.d[1],
+                    isinstance(cf, dh.Depreciation) and n == cf.d[0] # USE IF PAID IN ARREAR < n <= cf.d[1],
                 ]
             )
         ]
@@ -214,12 +214,10 @@ class Project:
         for n in range(self.periods + 1):
             cfs = self[n]  # Get the cashflows for this period
             if len(cfs) == 0:
-                ncfs.append(sp.Present(0) if n == 0 else sp.Future(0, n))
+                ncfs.append(NullCashflow())
                 continue
 
-            ncf = sum([cf[n] for cf in cfs]) or (
-                sp.Future(0, n) if n > 0 else sp.Present(0)
-            )
+            ncf = sum([cf[n] for cf in cfs]) or NullCashflow()
             ncfs.append(ncf)
 
         return ncfs
@@ -271,14 +269,14 @@ class Project:
         d = parse_d(d or self.periods)
         return self.npw().to_av(self.interest, d)
 
-    def irr(self, return_all=False):
+    def irr(self, *, return_all=False, default=None):
         if not all(
             [  # Make sure we have both positive and negative net cashflows; else, IRR doesn't exist
                 any([ncf.amount > 0 for ncf in self.get_ncfs()]),
                 any([ncf.amount < 0 for ncf in self.get_ncfs()]),
             ]
         ):
-            return None
+            return default
 
         def irr_fun(i):
             return self.npw(i[0]).amount
