@@ -253,14 +253,22 @@ class Project:
         if pvb == 0 or pvc == 0:
             return 0
 
-        return abs(pvb.amount / pvc.amount)
+        return abs(pvb / pvc)
 
     def eacf(self, d=None):
         d = parse_d(d or self.periods)
         return self.npw().to_av(self.interest, d)
 
     def irr(self, return_all=False):
-        irrs = fsolve(lambda i: self.npw(i).amount, self.interest, factor=0.1)
+        if not all([  # Make sure we have both positive and negative net cashflows; else, IRR doesn't exist
+            any([ncf.amount > 0 for ncf in self.get_ncfs()]),
+            any([ncf.amount < 0 for ncf in self.get_ncfs()])
+        ]):
+            return None
+
+        def irr_fun(i):
+            return self.npw(i[0]).amount
+        irrs = fsolve(irr_fun, self.interest, factor=0.1)
         return irrs if return_all is True else irrs[0]
 
     def mirr(self, e_inv=None, e_fin=None):
