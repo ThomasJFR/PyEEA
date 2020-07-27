@@ -81,13 +81,19 @@ class StraightLine(Depreciation):
         """
         cfs = []
         for n in ns:
+            cfs.append(sum(self.cashflows) if n == self.d[0] else NullCashflow())
+        return cfs[0] if len(cfs) == 1 else cfs
+
+
+        """
+        for n in ns:
             if self.d[0] < n <= self.d[1]:
                 cfs.append(sp.Future(self.annual_expense, n))
             else:
                 cfs.append(NullCashflow())
 
         return cfs[0] if len(cfs) == 1 else cfs
-
+        """
 
 class SumOfYearsDigits(Depreciation):
     def __init_(self, d, cashflows, salvage=0, title=None):
@@ -95,6 +101,12 @@ class SumOfYearsDigits(Depreciation):
 
     def cashflow_at(self, ns):
         cfs = []
+        for n in ns:
+            cfs.append(sum(self.cashflows) if n == self.d[0] else NullCashflow())
+        return cfs[0] if len(cfs) == 1 else cfs
+
+
+        """
         soyd = sum(range(self.D))
         for n in ns:
             if self.d[0] < n <= self.d[1]:
@@ -104,7 +116,7 @@ class SumOfYearsDigits(Depreciation):
                 cfs.append(sp.Future(value, n))
             else:
                 cfs.append(NullCashflow())
-
+        """
 
 class DoubleDecliningBalance(Depreciation):
     def __init__(self, rate, d, cashflows, salvage=0, title=None):
@@ -113,6 +125,11 @@ class DoubleDecliningBalance(Depreciation):
 
     def cashflow_at(self, ns):
         cfs = []
+        for n in ns:
+            cfs.append(sum(self.cashflows) if n == self.d[0] else NullCashflow())
+        return cfs[0] if len(cfs) == 1 else cfs
+        
+        """
         for n in ns:
             if self.d[0] < n <= self.d[1]:
                 balance = self.base * (1 - self.rate) ** (n - self.d[0] - 1)
@@ -131,7 +148,7 @@ class DoubleDecliningBalance(Depreciation):
                 cfs.append(NullCashflow())
 
         return cfs[0] if len(cfs) == 1 else cfs
-
+        """
 
 """
 class CapitalCostAllowance(DoubleDecliningBalance):
