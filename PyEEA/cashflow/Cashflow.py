@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from .utilities import parse_ns
 from numbers import Number
 
+
 class PaymentScheme(Enum):
     ARREAR = "payment in arrear"
     DUE = "payment in due"
@@ -26,9 +27,11 @@ class Cashflow(ABC):
         if not isinstance(amount, Number):
             print(amount, type(amount))
             raise TypeError("Value must be numeric!")
-        
+
         self.amount = amount
-        self.title = title or ("%s %i " % (self.get_cashflow_name(), Cashflow.cashflow_id))
+        self.title = title or (
+            "%s %i " % (self.get_cashflow_name(), Cashflow.cashflow_id)
+        )
         Cashflow.cashflow_id += 1
 
     def __str__(self):
@@ -99,6 +102,7 @@ class Cashflow(ABC):
     def get_cashflow_name(cls):
         return cls.__name__
 
+
 class NullCashflow(Cashflow):
     """
     Author: Thomas Richmond
@@ -123,13 +127,15 @@ class NullCashflow(Cashflow):
 
     def to_pv(self, i):
         from .SinglePaymentFactory import Present
+
         return Present(0)
 
     def to_fv(self, i, n):
         from .SinglePaymentFactory import Future
+
         return Future(0, n)
 
     def to_av(self, i, d, scheme):
         from .UniformSeriesFactory import Annuity
-        return Annuity(0, d)
 
+        return Annuity(0, d)

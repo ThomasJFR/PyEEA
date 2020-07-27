@@ -2,6 +2,7 @@ from .Cashflow import Cashflow, NullCashflow, PaymentScheme as ps
 from . import UniformSeriesFactory as us
 from .utilities import parse_d
 
+
 class Future(Cashflow):
     """
     Author: Thomas Richmond
@@ -11,7 +12,6 @@ class Future(Cashflow):
 
     def __init__(self, amount, n, title=None):
         super().__init__(amount, title)
-
         if type(n) is not int:
             raise ValueError("Argument n must be an integer!")
         self.n = n
@@ -50,13 +50,14 @@ class Future(Cashflow):
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = us.Annuity.parse_d(d)
         D = d[1] - d[0]
-        
+
         sinking_fund_factor = i / ((1 + i) ** D - 1)
         if d[0] == 0:
             av = self.amount * sinking_fund_factor
             return us.Annuity(av, d)
         else:
             av = self.to_pv(i).to_av(i, d)
+
 
 class Present(Future):
     """
@@ -85,7 +86,7 @@ class Present(Future):
         d = parse_d(d)
         D = d[1] - d[0]
 
-        capital_recovery_factor = ((i * (1 + i) ** D) / ((1 + i) ** D - 1))
+        capital_recovery_factor = (i * (1 + i) ** D) / ((1 + i) ** D - 1)
         if d[0] == 0:
             av = self.amount * capital_recovery_factor
             return us.Annuity(av, d)

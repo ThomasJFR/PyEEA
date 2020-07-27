@@ -2,6 +2,7 @@ from .Cashflow import Cashflow, NullCashflow, PaymentScheme as ps
 from . import SinglePaymentFactory as sp
 from .utilities import parse_d
 
+
 class Annuity(Cashflow):
     def __init__(self, amount, d, title=None):
         super().__init__(amount, title)
@@ -11,7 +12,7 @@ class Annuity(Cashflow):
     def cashflow_at(self, ns):
         cfs = []
         for n in ns:
-            if self.d[0] < n <= self.d[1]: 
+            if self.d[0] < n <= self.d[1]:
                 cfs.append(sp.Future(self.amount, n))
             else:
                 cfs.append(NullCashflow())
@@ -57,6 +58,7 @@ class Annuity(Cashflow):
             return self
         else:
             return self.to_pv(i).to_av(i, d)
+
 
 class Gradient(Annuity):
     def __init__(self, amount, G, d, title=None):

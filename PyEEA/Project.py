@@ -5,6 +5,7 @@ from .cashflow import DepreciationHelper as dh
 from .cashflow import Cashflow, NullCashflow
 from .cashflow.utilities import parse_d
 
+
 class Project:
     """
     Author: Thomas Richmond
@@ -94,6 +95,7 @@ class Project:
 
     def __enter__(self):
         from copy import deepcopy
+
         self.cashflows_copy = deepcopy(self.cashflows)
         return self
 
@@ -144,7 +146,7 @@ class Project:
         """
         for cf in cfs:
             self.add_cashflow(cf)
-            
+
         return self
 
     def revenues(self):
@@ -156,7 +158,7 @@ class Project:
             if isinstance(cf, dh.Depreciation):
                 if cf.base > 0:
                     revenues.append(cf)
-        
+
         return revenues
 
     def costs(self):
@@ -168,15 +170,16 @@ class Project:
             if isinstance(cf, dh.Depreciation):
                 if cf.base < 0:
                     costs.append(cf)
-        
-        return costs 
+
+        return costs
 
     def to_dataframe(self, n=None):
         import pandas as pd
+
         periods = list(range((n or self.periods) + 1))
         titles = [cf.get_title() for cf in self.cashflows]
         cashflows = [[cf[n] for cf in self.cashflows] for n in periods]
-        
+
         return pd.DataFrame(cashflows, index=periods, columns=titles)
 
     def to_cashflowdiagram(self, n=None, size=None):
@@ -186,9 +189,9 @@ class Project:
         periods = list(range((n or self.periods) + 1))
         titles = [cf.get_title() for cf in self.cashflows]
         cashflows = [[cf[n].amount for cf in self.cashflows] for n in periods]
-        
+
         plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
-        plotdata.plot(kind='bar', stacked='true')
+        plotdata.plot(kind="bar", stacked="true")
         plt.title(self.get_title())
         plt.ylabel("USD")
         plt.xlabel("Period")
@@ -258,7 +261,7 @@ class Project:
                     pvb += amt
                 else:
                     pvc += amt
-        
+
         if pvb == 0 or pvc == 0:
             return 0
 
@@ -269,14 +272,17 @@ class Project:
         return self.npw().to_av(self.interest, d)
 
     def irr(self, return_all=False):
-        if not all([  # Make sure we have both positive and negative net cashflows; else, IRR doesn't exist
-            any([ncf.amount > 0 for ncf in self.get_ncfs()]),
-            any([ncf.amount < 0 for ncf in self.get_ncfs()])
-        ]):
+        if not all(
+            [  # Make sure we have both positive and negative net cashflows; else, IRR doesn't exist
+                any([ncf.amount > 0 for ncf in self.get_ncfs()]),
+                any([ncf.amount < 0 for ncf in self.get_ncfs()]),
+            ]
+        ):
             return None
 
         def irr_fun(i):
             return self.npw(i[0]).amount
+
         irrs = fsolve(irr_fun, self.interest, factor=0.1)
         return irrs if return_all is True else irrs[0]
 
@@ -294,7 +300,9 @@ class Project:
             [ncf.to_pv(e_inv or self.interest) for ncf in ncfs if ncf.amount < 0]
         ) or sp.Present(0)
 
-        return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self.interest, factor=0.1)[0]
+        return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self.interest, factor=0.1)[
+            0
+        ]
 
     def describe():
         pass

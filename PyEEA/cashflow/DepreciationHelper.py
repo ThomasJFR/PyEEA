@@ -6,6 +6,7 @@ from . import SinglePaymentFactory as sp
 from . import UniformSeriesFactory as us
 from .utilities import parse_d, parse_ns
 
+
 class Depreciation(ABC):
     def __init__(self, d, cashflows, salvage=0, title=None):
         """
@@ -18,16 +19,20 @@ class Depreciation(ABC):
         self.D = self.d[1] - self.d[0]
         self.salvage = salvage
         self.title = title
-        
+
         if not isinstance(cashflows, Iterable):
             cashflows = [cashflows]
-        
+
         if any([True for cf in cashflows if not isinstance(cf, sp.Future)]):
-            raise ValueError("Depreciated cashflows can only consist of single payments occuring at the same period.")
+            raise ValueError(
+                "Depreciated cashflows can only consist of single payments occuring at the same period."
+            )
         if len({cf.n for cf in cashflows}) != 1:
             raise ValueError("Depreciated cashflows must occur in the same period")
         if self.d[0] < cashflows[0].n <= self.d[1]:
-            raise ValueError("Depreciated cashflows are out of range of defined depreciation period!")
+            raise ValueError(
+                "Depreciated cashflows are out of range of defined depreciation period!"
+            )
         self.cashflows = cashflows
         self.base = sum([cf.amount for cf in self.cashflows])
 
@@ -40,13 +45,11 @@ class Depreciation(ABC):
         ns = parse_ns(val)
         return self.cashflow_at(ns)
 
-
     def set_title(self, title):
         self.title = title
 
     def get_title(self):
         return self.title
-
 
     @abstractmethod
     def cashflow_at(self, ns):
@@ -66,6 +69,7 @@ class Depreciation(ABC):
     def to_av(self, i, d):
         return self.to_pv(i).to_av(i, d)
 
+
 class StraightLine(Depreciation):
     def __init__(self, d, cashflows, salvage=0, title=None):
         super().__init__(d, cashflows, salvage, title)
@@ -81,9 +85,8 @@ class StraightLine(Depreciation):
                 cfs.append(sp.Future(self.annual_expense, n))
             else:
                 cfs.append(NullCashflow())
-        
-        return cfs[0] if len(cfs) == 1 else cfs
 
+        return cfs[0] if len(cfs) == 1 else cfs
 
 
 class SumOfYearsDigits(Depreciation):
@@ -102,21 +105,24 @@ class SumOfYearsDigits(Depreciation):
             else:
                 cfs.append(NullCashflow())
 
+
 class DoubleDecliningBalance(Depreciation):
     def __init__(self, rate, d, cashflows, salvage=0, title=None):
         super().__init__(d, cashflows, salvage, title)
-        self.rate = rate 
+        self.rate = rate
 
     def cashflow_at(self, ns):
         cfs = []
         for n in ns:
             if self.d[0] < n <= self.d[1]:
-                balance = self.base * (1 - self.rate)**(n - self.d[0] - 1)
+                balance = self.base * (1 - self.rate) ** (n - self.d[0] - 1)
                 expense = balance * self.rate
                 if n == self.d[1]:
                     adjustment = (balance - expense) + self.salvage
-                    expense += adjustment  # Final year; adjust cashflow to achieve salvage  
-                
+                    expense += (
+                        adjustment  # Final year; adjust cashflow to achieve salvage
+                    )
+
                 if n == 0:
                     cfs.append(sp.Present(expense))
                 else:
@@ -125,6 +131,8 @@ class DoubleDecliningBalance(Depreciation):
                 cfs.append(NullCashflow())
 
         return cfs[0] if len(cfs) == 1 else cfs
+
+
 """
 class CapitalCostAllowance(DoubleDecliningBalance):
     def __init__(self, rate, ucc_class)

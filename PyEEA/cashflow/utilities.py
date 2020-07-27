@@ -1,5 +1,3 @@
-
-
 def parse_d(d):
     """
     Author: Thomas Richmond
@@ -37,6 +35,7 @@ def parse_d(d):
             + "must be whole number or list of whole numbers"
         )
 
+
 def parse_ns(val):
     if type(val) == int:
         ns = (val,)  # Get the cashflows in a period as an array
@@ -48,5 +47,4 @@ def parse_ns(val):
         step = val.step or 1
         ns = range(start, stop, step)
 
-    return ns  
-
+    return ns
