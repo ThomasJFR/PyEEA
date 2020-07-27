@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from collections.abc import Iterable
 from .utilities import parse_ns
+from numbers import Number
 
 class PaymentScheme(Enum):
     ARREAR = "payment in arrear"
@@ -117,10 +118,14 @@ class NullCashflow(Cashflow):
         return self
 
     def to_pv(self, i):
-        return sp.Present(0)
+        from .SinglePaymentFactory import Present
+        return Present(0)
 
     def to_fv(self, i, n):
-        return sp.Future(0, n)
+        from .SinglePaymentFactory import Future
+        return Future(0, n)
 
     def to_av(self, i, d, scheme):
-        return us.Annuity(0, d)
+        from .UniformSeriesFactory import Annuity
+        return Annuity(0, d)
+
