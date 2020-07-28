@@ -30,7 +30,7 @@ class Project:
 
     def __getitem__(self, val):
         if type(val) is str:
-            matches = [cf for cf in self.cashflows if cf.title == val] or [None]
+            matches = [cf for cf in self.cashflows if cf.title == val] or [NullCashflow()]
             return matches[0] if len(matches) == 1 else matches
         else:  # A numeric index
             ns = parse_ns(val)
