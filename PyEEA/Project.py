@@ -28,6 +28,9 @@ class Project:
         self.cashflows = []
         self.periods = 0
 
+    def __str__(self):
+        return self.to_dataframe().to_string()
+
     def __getitem__(self, val):
         if type(val) is str:
             matches = [cf for cf in self.cashflows if cf.title == val] or [NullCashflow()]
