@@ -3,7 +3,7 @@ from PyEEA import SinglePaymentFactory as sp
 from PyEEA import UniformSeriesFactory as us
 from PyEEA import DepreciationHelper as dh
 from PyEEA.output import write_excel, SpreadsheetFeature as ssfs
-
+from matplotlib import pyplot as plt
 print("CASHFLOW STUFF")
 print("--------------")
 
@@ -14,17 +14,40 @@ depreciator = dh.DoubleDecliningBalance(0.20, 10, title="Big Boy", cashflows=[
 for i in range(12):
     print(depreciator[i])
 
+p = Project(0.1)
+p.add_cashflow(depreciator)
+print(p.npw())
+print("Now:", depreciator[0], p[0])
+
 print("PROJECT STUFF")
 print("-------------")
 my_project = Project(interest=0.12)
-my_project                                                              \
-    .add_cashflow(sp.Present( 5000,         title="Initial Payment"))   \
-    .add_cashflow(us.Annuity( 250, [2,5],   title="Benefits"))          \
-    .add_cashflow( sp.Future(-600,  2,      title="Maintenance 1"))     \
-    .add_cashflow( sp.Future(-500,  3,      title="Maintenance 2"))     \
-    .add_cashflow( sp.Future(-100, 5,       title="Maintenance 3"))     \
-    .add_cashflow(us.Perpetuity(50, 2,      title="Lottery Win"))       \
-    .add_cashflow(us.GeoPerpetuity(10, 0.1, title="Yearly Bonus"))
+my_project.add_cashflows([
+    sp.Present(-1000,  title="Capital Costs"),
+    us.Annuity(500, 5, title="Annual Benefits")
+])
+print(my_project.irr())
+
+print("NPW Before: %s" % str(my_project.npw()))
+
+from PyEEA import simulation_analysis, sensitivity_analysis
+import pandas as pd
+def sawtooth():
+    from numpy.random import random
+    return random() * 25
+eacfs = simulation_analysis(my_project, {"Capital Costs": 100, "Annual Benefits": sawtooth}, valuator=my_project.eacf)
+plt.hist([eacf.amount for eacf in eacfs])
+plt.show()
+
+#npw_sensitivities = sensitivity_analysis(my_project)
+irr_sensitivities = sensitivity_analysis(my_project, [0.7, 0.85, 1, 1.15, 1.30], valuator=my_project.irr)
+df = pd.DataFrame(
+        #[[npw.amount for npw in npws] for npws in npw_sensitivities], 
+        irr_sensitivities.values(),
+        columns=["-30%", "-15%", "Actual", "+15%", "+30%"],
+        index=irr_sensitivities.keys())
+df.style.set_caption("Hello World")
+print(df)
 
 """
 print([[str(cf) for cf in p] for p in my_project[:]])
