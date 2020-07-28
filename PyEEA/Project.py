@@ -3,7 +3,7 @@ from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
 from .cashflow import DepreciationHelper as dh
 from .cashflow import Cashflow, NullCashflow
-from .cashflow.utilities import parse_d
+from .cashflow.utilities import parse_d, parse_ns
 
 
 class Project:
@@ -29,30 +29,25 @@ class Project:
         self.periods = 0
 
     def __getitem__(self, val):
-        if type(val) == int:
-            ns = (val,)  # Get the cashflows in a period as an array
-        elif type(val) == tuple:
-            ns = val  # Get the cashflows of multiple periods as a 2D array
-        elif type(val) == slice:
-            start = val.start or 0
-            stop = (val.stop if val.stop else self.periods) + 1
-            step = val.step or 1
-            ns = range(start, stop, step)
-
-        cfs_in_period = lambda n: [
-            cf
-            for cf in self.cashflows
-            if any(
-                [
-                    isinstance(cf, sp.Future) and n == cf.n,
-                    isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
-                    isinstance(cf, us.Perpetuity) and n > cf.d0,
-                    isinstance(cf, dh.Depreciation) and n == cf.d[0] # USE IF PAID IN ARREAR < n <= cf.d[1],
-                ]
-            )
-        ]
-        cfs = [[cf[n] for cf in cfs_in_period(n)] or [NullCashflow()] for n in ns]
-        return cfs[0] if len(cfs) == 1 else cfs
+        if type(val) is str:
+            matches = [cf for cf in self.cashflows if cf.title == val] or [None]
+            return matches[0] if len(matches) == 1 else matches
+        else:  # A numeric index
+            ns = parse_ns(val)
+            cfs_in_period = lambda n: [
+                cf
+                for cf in self.cashflows
+                if any(
+                    [
+                        isinstance(cf, sp.Future) and n == cf.n,
+                        isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
+                        isinstance(cf, us.Perpetuity) and n > cf.d0,
+                        isinstance(cf, dh.Depreciation) and n == cf.d[0] # USE IF PAID IN ARREAR < n <= cf.d[1],
+                    ]
+                )
+            ]
+            cfs = [[cf[n] for cf in cfs_in_period(n)] or [NullCashflow()] for n in ns]
+            return cfs[0] if len(cfs) == 1 else cfs
 
     def __add__(self, other):
         agg = Project()
