@@ -30,7 +30,7 @@ class Cashflow(ABC):
 
     cashflow_id = 1  # Iterating counter used whenever a title isn't given
 
-    def __init__(self, amount, title=None, tags=None):
+    def __init__(self, amount, title=None, tags=[]):
         if not isinstance(amount, Number):
             print(amount, type(amount))
             raise TypeError("Value must be numeric!")
@@ -39,7 +39,9 @@ class Cashflow(ABC):
         self.title = title or (
             "%s %i " % (self.get_cashflow_name(), Cashflow.cashflow_id)
         )
-        self.tags = [self.title]
+        if type(tags) is str:
+            tags = [tags]
+        self.tags = [self.title, *tags]
         Cashflow.cashflow_id += 1
 
     def __str__(self):
@@ -129,7 +131,7 @@ class NullCashflow(Cashflow):
                  no effect at a period, or that there are no cashflows in a period.
     """
 
-    def __init__(self):
+    def __init__(self, title=None, tags=None):
         return super().__init__(0)
 
     def __add__(self, other):

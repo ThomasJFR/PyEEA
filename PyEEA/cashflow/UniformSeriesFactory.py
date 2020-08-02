@@ -4,8 +4,8 @@ from .utilities import parse_d
 
 
 class Annuity(Cashflow):
-    def __init__(self, amount, d, title=None):
-        super().__init__(amount, title)
+    def __init__(self, amount, d, title=None, tags=None):
+        super().__init__(amount, title, tags)
         self.d = parse_d(d)  # The start and end period of the annuity
         self.D = self.d[1] - self.d[0]  # The number of periods for the annuity
 
@@ -61,8 +61,8 @@ class Annuity(Cashflow):
 
 
 class Gradient(Annuity):
-    def __init__(self, amount, G, d, title=None):
-        super().__init__(amount, d, title)
+    def __init__(self, amount, G, d, title=None, tags=None):
+        super().__init__(amount, d, title, tags)
         self.G = G
 
     def to_shorthand(self):
@@ -106,8 +106,8 @@ class Gradient(Annuity):
 
 
 class Geometric(Annuity):
-    def __init__(self, amount, g, d, title=None):
-        super().__init__(amount, d, title)
+    def __init__(self, amount, g, d, title=None, tags=None):
+        super().__init__(amount, d, title, tags)
         self.g = g
 
     def to_shorthand(self):
@@ -164,8 +164,8 @@ class Geometric(Annuity):
 
 
 class Perpetuity(Cashflow):
-    def __init__(self, amount, d0=0, title=None):
-        super().__init__(amount, title)
+    def __init__(self, amount, d0=0, title=None, tags=None):
+        super().__init__(amount, title, tags)
         if type(d0) is not int:
             raise TypeError("Parameter d0 must be an integer!")
         self.d0 = d0
@@ -197,8 +197,8 @@ class Perpetuity(Cashflow):
 
 
 class GeoPerpetuity(Perpetuity):
-    def __init__(self, amount, g, d0=0, title=None):
-        super().__init__(amount, d0, title)
+    def __init__(self, amount, g, d0=0, title=None, tags=None):
+        super().__init__(amount, d0, title, tags)
         self.g = g  # Geometric rate
 
     def to_shorthand(self):

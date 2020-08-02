@@ -10,8 +10,8 @@ class Future(Cashflow):
     Parameter: n [number] - The period at which the amount is received.
     """
 
-    def __init__(self, amount, n, title=None):
-        super().__init__(amount, title)
+    def __init__(self, amount, n, title=None, tags=None):
+        super().__init__(amount, title, tags)
         if type(n) is not int:
             raise ValueError("Argument n must be an integer!")
         self.n = n
@@ -66,8 +66,8 @@ class Present(Future):
                  of Future where n=0
     """
 
-    def __init__(self, amount, title=None):
-        super().__init__(amount, 0, title)
+    def __init__(self, amount, title=None, tags=None):
+        super().__init__(amount, 0, title, tags)
 
     def to_shorthand(self):
         """
