@@ -86,6 +86,8 @@ class Present(Future):
         d = parse_d(d)
         D = d[1] - d[0]
 
+        if D == 0:
+            raise ValueError("Annuity duration must be greater than zero years")
         capital_recovery_factor = (i * (1 + i) ** D) / ((1 + i) ** D - 1)
         if d[0] == 0:
             av = self.amount * capital_recovery_factor
