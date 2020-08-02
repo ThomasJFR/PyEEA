@@ -12,18 +12,25 @@ class PaymentScheme(Enum):
 
 class Cashflow(ABC):
     """
-    Author: Thomas Richmond
-    Description: Abstract defintion of a cashflow. All cashflows must extend
-                 this definition and implement its conversion functions.
-    Parameters: amount [number] - The characteristic value of the cash flow.
-                                  Can be thought of the multiplier to the 
-                                  characteristic interest factor of the cash flow.
-                                  (e.g. < amount * (P|F, i, n) >)
+    Author
+        Thomas Richmond
+    Description
+        Abstract defintion of a cashflow. All cashflows must extend
+        this definition and implement its conversion functions.
+    Args:
+        amount [number] - The characteristic value of the cash flow.
+                          Can be thought of the multiplier to the 
+                          characteristic interest factor of the cash flow.
+                          (e.g. < amount * (P|F, i, n) >)
+        title [string] - A name that describes what the cashflow represents.
+        tags [list(string)] - A list of strings that provide additional
+                              information on the context of the cashflow.
+                              Titles are included as a tag by default.
     """
 
     cashflow_id = 1  # Iterating counter used whenever a title isn't given
 
-    def __init__(self, amount, title=None):
+    def __init__(self, amount, title=None, tags=None):
         if not isinstance(amount, Number):
             print(amount, type(amount))
             raise TypeError("Value must be numeric!")
@@ -32,6 +39,7 @@ class Cashflow(ABC):
         self.title = title or (
             "%s %i " % (self.get_cashflow_name(), Cashflow.cashflow_id)
         )
+        self.tags = [self.title]
         Cashflow.cashflow_id += 1
 
     def __str__(self):
@@ -61,9 +69,17 @@ class Cashflow(ABC):
 
     def set_title(self, title):
         self.title = title
+        self.tags[0] = self.title  # Position zero contains the title
 
     def get_title(self):
         return self.title
+    
+    def add_tag(self, tag):
+        self.tags.append(tag)
+
+    def add_tags(self, tags):
+        for tag in tags:
+            self.add_tag(tag)
 
     def to_shorthand(self, info):
         # Step 1: Add the cash amount
