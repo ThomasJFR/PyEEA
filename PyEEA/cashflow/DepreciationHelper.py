@@ -8,7 +8,10 @@ from .utilities import parse_d, parse_ns
 
 
 class Depreciation(ABC):
-    def __init__(self, d, cashflows, salvage=0, title=None):
+
+    depreciation_id = 1  # Iterating counter used whenever a title isn't given
+    
+    def __init__(self, d, cashflows, salvage=0, title=None, tags=None):
         """
         Author: Thomas Richmond
         Purpose:
@@ -18,7 +21,6 @@ class Depreciation(ABC):
         self.d = parse_d(d)
         self.D = self.d[1] - self.d[0]
         self.salvage = salvage
-        self.title = title
 
         if not isinstance(cashflows, Iterable):
             cashflows = [cashflows]
@@ -36,6 +38,18 @@ class Depreciation(ABC):
         self.cashflows = cashflows
         self.base = sum([cf.amount for cf in self.cashflows])
 
+        self.title = title or (
+            "%s %i " % (self.get_depreciation_name(), Depreciation.depreciation_id)
+        )
+
+        if not tags:  # If falsey, just give an empty list
+            tags = []
+        elif type(tags) is str:
+            tags = [tags]
+        self.tags = [self.title, *tags]
+        
+        Depreciation.depreciation_id += 1
+ 
     def __getitem__(self, val):
         """
         Implemented so we can get the cashflow that occurs at period n as follows:
@@ -68,10 +82,15 @@ class Depreciation(ABC):
 
     def to_av(self, i, d):
         return self.to_pv(i).to_av(i, d)
+    
+    @classmethod
+    def get_depreciation_name(cls):
+        return cls.__name__
+
 
 
 class StraightLine(Depreciation):
-    def __init__(self, d, cashflows, salvage=0, title=None):
+    def __init__(self, d, cashflows, salvage=0, title=None, tags=None):
         super().__init__(d, cashflows, salvage, title)
         self.annual_expense = (self.base - self.salvage) / self.D
 
@@ -96,8 +115,8 @@ class StraightLine(Depreciation):
         """
 
 class SumOfYearsDigits(Depreciation):
-    def __init_(self, d, cashflows, salvage=0, title=None):
-        super().__init__(d, cashflows, salvage, title)
+    def __init_(self, d, cashflows, salvage=0, title=None, tags=None):
+        super().__init__(d, cashflows, salvage, title, tags)
 
     def cashflow_at(self, ns):
         cfs = []
@@ -119,8 +138,8 @@ class SumOfYearsDigits(Depreciation):
         """
 
 class DoubleDecliningBalance(Depreciation):
-    def __init__(self, rate, d, cashflows, salvage=0, title=None):
-        super().__init__(d, cashflows, salvage, title)
+    def __init__(self, rate, d, cashflows, salvage=0, title=None, tags=None):
+        super().__init__(d, cashflows, salvage, title, tags)
         self.rate = rate
 
     def cashflow_at(self, ns):
