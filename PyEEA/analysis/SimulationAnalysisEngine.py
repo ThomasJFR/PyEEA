@@ -8,7 +8,7 @@ def simulation_analysis(project, sim_dict, iterations=250, valuator=None):
     Args:
         project:    An instance of Project to perform the simulation on
         sim_dict:   A dict where the key is the name of the cashflow to simulate and the value 
-                    is either a number defining the standard deviation for the cashflow, or a 
+                    is either a number defining the standard deviation for the cashflow as a percentage, or a 
                     function defining some way to modify the cashflow by an amount
     """
     
@@ -16,8 +16,8 @@ def simulation_analysis(project, sim_dict, iterations=250, valuator=None):
     for key in sim_dict:
         if isinstance(sim_dict[key], Number):
             stdev = sim_dict[key]
-            def std_dist():
-                return stdev * standard_normal()
+            def std_dist(amt):
+                return amt * stdev * standard_normal()
             sim_dict[key] = std_dist
     
     valuator = valuator or project.npw
@@ -30,8 +30,10 @@ def simulation_analysis(project, sim_dict, iterations=250, valuator=None):
         with project as p:
             for key in sim_dict:
                 sim_fun = sim_dict[key]
-                cf = p[key]
-                cf.amount += sim_fun()
+                n_cashflows = len(p[key])
+                for n in range(n_cashflows):
+                    cf = p[key][n]
+                    cf.amount += sim_fun(cf.amount)
             valuations.append(valuator())
 
     return valuations
