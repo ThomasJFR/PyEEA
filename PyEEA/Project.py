@@ -32,25 +32,37 @@ class Project:
         return self.to_dataframe().to_string()
 
     def __getitem__(self, val):
+        # OPTION 1: Index by tags
         if type(val) is str:
-            matches = [cf for cf in self.cashflows if val in cf.tags] or [NullCashflow()]
-            return matches[0] if len(matches) == 1 else matches
-        else:  # A numeric index
-            ns = parse_ns(val)
-            cfs_in_period = lambda n: [
-                cf
-                for cf in self.cashflows
-                if any(
-                    [
+            matches = [cf for cf in self.cashflows if val in cf.tags]
+            return matches
+        # OPTION 2: Index by periods
+        else: 
+            if type(val) == int:
+                ns = (val,)  # Get the cashflows in a period as an array
+            elif type(val) == tuple:
+                ns = val  # Get the cashflows of multiple periods as a 2D array
+            elif type(val) == slice:
+                start = val.start or 0
+                stop = (val.stop or self.periods) + 1
+                step = val.step or 1
+                ns = range(start, stop, step)
+
+            def get_cfs_for_period(n):
+                def do_include(cf):
+                    return any([
                         isinstance(cf, sp.Future) and n == cf.n,
                         isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
                         isinstance(cf, us.Perpetuity) and n > cf.d0,
                         isinstance(cf, dh.Depreciation) and n == cf.d[0] # USE IF PAID IN ARREAR < n <= cf.d[1],
-                    ]
-                )
+                    ])
+                return [cf for cf in self.cashflows if do_include(cf)]
+
+            cfs = [
+                [cf[n] for cf in get_cfs_for_period(n)]
+                for n in ns
             ]
-            cfs = [[cf[n] for cf in cfs_in_period(n)] or [NullCashflow()] for n in ns]
-            return cfs[0] if len(cfs) == 1 else cfs
+            return cfs
 
     def __add__(self, other):
         agg = Project()
@@ -238,7 +250,7 @@ class Project:
                 "No interest provided for npw calculations.\nDid you mean to use set_interest(i)?"
             )
 
-        return sum([cf.to_pv(i or self.interest) for cf in self.cashflows])
+        return sum([cf.to_pv(i or self.interest) for cf in self.cashflows]) or NullCashflow()
 
     def nfw(self, n, i=None):
         return self.npw().to_fv(i or self.interest, n)
@@ -270,8 +282,8 @@ class Project:
     def irr(self, *, return_all=False, default=None):
         if not all(
             [  # Make sure we have both positive and negative net cashflows; else, IRR doesn't exist
-                any([ncf.amount > 0 for ncf in self.get_ncfs()]),
-                any([ncf.amount < 0 for ncf in self.get_ncfs()]),
+                any([(sum(cfs) or NullCashflow()).amount > 0 for cfs in self[:]]),
+                any([(sum(cfs) or NullCashflow()).amount < 0 for cfs in self[:]])
             ]
         ):
             return default
