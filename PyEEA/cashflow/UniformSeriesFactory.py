@@ -117,7 +117,7 @@ class Geometric(Annuity):
         cfs = []
         for n in ns:
             if self.d[0] < n <= self.d[1]:
-                fv = self.amount * (1 + g) ** (n - self.d[0] - 1)
+                fv = self.amount * (1 + self.g) ** (n - self.d[0] - 1)
                 cfs.append(sp.Future(fv, n))
             else:
                 cfs.append(NullCashflow())
@@ -131,7 +131,7 @@ class Geometric(Annuity):
                 return sp.Present(xv)
             else:
                 return sp.Future(xv, self.d[0]).to_pv(i)
-        elif i > self.g:
+        else:
             xv = (
                 self.amount
                 * (1 - (1 + self.g) ** self.D * (1 + i) ** -self.D)
@@ -142,8 +142,8 @@ class Geometric(Annuity):
                 return sp.Present(xv)
             else:
                 return sp.Future(xv, self.d[0]).to_pv(i)
-        else:
-            raise ValueError("Geometric rate (g) cannot exceed interest rate (i)!")
+        #else:
+         #   raise ValueError("Geometric rate (g) cannot exceed interest rate (i)!")
 
     def to_fv(self, i, n):
         """if i == self.g:
