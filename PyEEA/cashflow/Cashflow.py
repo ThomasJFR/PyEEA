@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 from collections.abc import Iterable
-from .utilities import parse_ns
+from ..utilities import parse_ns
 from numbers import Number
 
 

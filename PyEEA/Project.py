@@ -1,10 +1,12 @@
 from scipy.optimize import fsolve
+
+from .cashflow import Cashflow, NullCashflow
 from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
-from .cashflow import DepreciationHelper as dh
-from .cashflow import TaxationHelper as th
-from .cashflow import Cashflow, NullCashflow
-from .cashflow.utilities import parse_d, parse_ns
+
+from .taxation import TaxationHelper as th, DepreciationHelper as dh
+
+from .utilities import parse_d, parse_ns
 
 
 class Project:

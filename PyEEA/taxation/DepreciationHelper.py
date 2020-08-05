@@ -1,11 +1,10 @@
 from collections.abc import Iterable
 from abc import ABC, abstractmethod
 
-from . import Cashflow, NullCashflow
-from . import SinglePaymentFactory as sp
-from . import UniformSeriesFactory as us
-from .utilities import parse_d, parse_ns
+from ..cashflow import Cashflow, NullCashflow
+from ..cashflow.SinglePaymentFactory import Future
 
+from ..utilities import parse_d, parse_ns
 
 class Depreciation(ABC):
 
@@ -25,7 +24,7 @@ class Depreciation(ABC):
         if not isinstance(cashflows, Iterable):
             cashflows = [cashflows]
 
-        if any([True for cf in cashflows if not isinstance(cf, sp.Future)]):
+        if any([True for cf in cashflows if not isinstance(cf, Future)]):
             raise ValueError(
                 "Depreciated cashflows can only consist of single payments occuring at the same period."
             )
@@ -74,17 +73,6 @@ class Depreciation(ABC):
         Parameters: ns [tuple(int)] - The periods to get the value of depreciation at.
         """
         pass
-
-    def to_pv(self, i):
-        xv = sum(self.cashflows)
-        return xv.to_pv(i)
-
-    def to_fv(self, i, n):
-        xv = sum(self.cashflows)
-        return xv.to_fv(i, n)
-
-    def to_av(self, i, d):
-        return self.to_pv(i).to_av(i, d)
     
     @classmethod
     def get_depreciation_name(cls):
@@ -105,7 +93,7 @@ class StraightLine(Depreciation):
         for n in ns:
             if self.d[0] < n <= self.d[1]:
                 expense = (self.base - self.salvage) * self.rate
-                dps.append(sp.Future(expense, n))
+                dps.append(Future(expense, n))
             else:
                 dps.append(NullCashflow())
 
@@ -123,7 +111,7 @@ class SumOfYearsDigits(Depreciation):
                 year = n - self.d[0]
                 rate_now = (self.D - year) / soyd
                 expense = (self.base - self.salvage) * rate_now
-                dps.append(sp.Future(expense, n))
+                dps.append(Future(expense, n))
             else:
                 dps.append(NullCashflow())
 
@@ -144,7 +132,7 @@ class DecliningBalance(Depreciation):
                 if n == self.d[1]:  # Final year; adjust cashflow to achieve salvage
                     adjustment = (balance_now - expense) + self.salvage
                     expense += adjustment
-                dps.append(sp.Future(expense, n))
+                dps.append(Future(expense, n))
             else:
                 dps.append(NullCashflow())
 

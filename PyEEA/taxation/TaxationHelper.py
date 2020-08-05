@@ -1,6 +1,7 @@
-from .Cashflow import Cashflow, NullCashflow
-from .SinglePaymentFactory import Future
-from .utilities import parse_ns, parse_d
+from ..cashflow import Cashflow, NullCashflow
+from ..cashflow.SinglePaymentFactory import Future
+
+from ..utilities import parse_ns, parse_d
 
 class Tax:
     def __init__(self, tag, rate, title=None):

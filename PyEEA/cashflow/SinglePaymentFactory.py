@@ -1,6 +1,6 @@
 from .Cashflow import Cashflow, NullCashflow, PaymentScheme as ps
 from . import UniformSeriesFactory as us
-from .utilities import parse_d
+from ..utilities import parse_d
 
 
 class Future(Cashflow):
