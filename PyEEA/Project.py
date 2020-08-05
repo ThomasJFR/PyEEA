@@ -22,10 +22,6 @@ class Project:
                                     cash flows within the project.
     """
 
-    # TODO:
-    #   Change behaviour for Depreciaton models to return cashflows instead of entire depreciation
-    #       -- Should probably be implemented in get_cashflows
-
     def __init__(self, title=None, interest=0):
         self._title = title
         self._interest = interest
@@ -56,22 +52,17 @@ class Project:
                 step = val.step or 1
                 ns = range(start, stop, step)
 
-            def get_cfs_for_period(n):
-                def do_include(cf):
+            def get_cashflows_for_period(n):
+                def do_include_cashflow(cf):
                     return any([
                         isinstance(cf, sp.Future) and n == cf.n,
                         isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
                         isinstance(cf, us.Perpetuity) and n > cf.d0,
-                        isinstance(cf, dh.Depreciation) and n == cf.d[0] # USE IF PAID IN ARREAR < n <= cf.d[1],
                     ])
-                return [cf for cf in self.get_cashflows() if do_include(cf)]
-
-            cfs = [
-                [cf[n] for cf in get_cfs_for_period(n)]
-                for n in ns
-            ]
-
-            return cfs
+                return [cf for cf in self.get_cashflows() if do_include_cashflow(cf)]
+            
+            cashflows = [[cf[n] for cf in get_cashflows_for_period(n)] for n in ns]
+            return cashflows
 
     def __add__(self, other):
         agg = Project()
@@ -189,10 +180,10 @@ class Project:
 
         return self
 
-    def get_cashflows(self, taxed=True):
+    def get_cashflows(self):
         return self._cashflows
 
-    def get_depreciations():
+    def get_depreciations(self):
         return self._depreciations
 
     def add_tax(self, tax):
@@ -207,18 +198,23 @@ class Project:
         if not isinstance(tax, th.Tax):
             raise TypeError("Argument must be a Tax instance!")
         
-        tax.set_cashflow_binder(self.get_cashflows)
         self._taxes.append(tax)
 
         return self
 
-    def add_taxes(self, tag_rate_dict):
-        for tag in tag_rate_dict:
-            self.add_tax(tag, tag_rate_dict[tag])
+    def add_taxes(self, taxes):
+        for tax in taxes:
+            self.add_tax(tax)
         return self
 
     def get_taxes(self):
         return self._taxes 
+
+    def get_taxflows(self):
+        return [tax.generate_cashflow(self) for tax in self.get_taxes()]
+
+    def get_taxed_cashflows(self):
+        return self.get_cashflows() + self.get_taxflows()
 
     def revenues(self):
         revenues = []
@@ -241,9 +237,9 @@ class Project:
         import pandas as pd
 
         periods = list(range((n or self._periods) + 1))
-        titles = [cf.get_title() for cf in self.get_cashflows()]
-        cashflows = [[cf[n] for cf in self.get_cashflows()] for n in periods]
-
+        titles = [cf.get_title() for cf in self.get_taxed_cashflows()]
+        cashflows = [[cf[n] for cf in self.get_taxed_cashflows()] for n in periods]
+        
         return pd.DataFrame(cashflows, index=periods, columns=titles)
 
     def to_cashflowdiagram(self, n=None, size=None):
@@ -251,8 +247,8 @@ class Project:
         from matplotlib import pyplot as plt
 
         periods = list(range((n or self._periods) + 1))
-        titles = [cf.get_title() for cf in self.get_cashflows()]
-        cashflows = [[cf[n].amount for cf in self.get_cashflows()] for n in periods]
+        titles = [cf.get_title() for cf in self.get_taxed_cashflows()]
+        cashflows = [[cf[n].amount for cf in self.get_taxed_cashflows()] for n in periods]
 
         plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
         plotdata.plot(kind="bar", stacked="true")

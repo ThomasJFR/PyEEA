@@ -122,7 +122,7 @@ class SumOfYearsDigits(Depreciation):
             if self.d[0] < n <= self.d[1]:
                 year = n - self.d[0]
                 rate_now = (self.D - year) / soyd
-                expense = self.base * rate_now
+                expense = (self.base - self.salvage) * rate_now
                 dps.append(sp.Future(expense, n))
             else:
                 dps.append(NullCashflow())
@@ -136,16 +136,17 @@ class DecliningBalance(Depreciation):
 
     def depreciation_at(self, ns):
         dps = []
-        if self.d[0] < n <= self.d[1]:
-            year = n - d[0]
-            balance_now = self.base * (1 - self.rate) ** (year - 1)
-            expense = balance_now * self.rate
-            if n == self.d[1]:  # Final year; adjust cashflow to achieve salvage
-                adjustment = (balance - expense) + self.salvage
-                expense += adjustment
-            dps.append(sp.Future(expense, n))
-        else:
-            dps.append(NullCashflow())
+        for n in ns:
+            if self.d[0] < n <= self.d[1]:
+                year = n - self.d[0]
+                balance_now = (self.base - self.salvage) * (1 - self.rate) ** (year - 1)
+                expense = balance_now * self.rate
+                if n == self.d[1]:  # Final year; adjust cashflow to achieve salvage
+                    adjustment = (balance_now - expense) + self.salvage
+                    expense += adjustment
+                dps.append(sp.Future(expense, n))
+            else:
+                dps.append(NullCashflow())
 
         return dps[0] if len(dps) == 1 else dps
 
