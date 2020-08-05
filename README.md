@@ -15,13 +15,22 @@ spep = Project("Solar Plant Expansion Project", interest=0.10)
 # Model our project using various cashflow models
 from PyEEA import SinglePaymentFactory as sp
 from PyEEA import UniformSeriesFactory as us
+from PyEEA import DepreciationHelper as dh
 spep.add_cashflows([
-    sp.Present( -50000,        title="New Panel Cost"),
-    sp.Present( -6000,         title="Installation Cost"),
+    # Capital Costs
+    dh.DecliningBalance([
+        sp.Present( -50000,        title="New Panel Cost", tags="VAT"),
+        sp.Present( -6000,         title="Installation Cost", tags="VAT")],
+        0.40, 30, salvage=10000, title="Capital Expenses", tags="VAT")
+    
+    # Ongoing Costs
     us.Gradient(-1500, 50, 30, title="Maintenance Cost"),
-    us.Annuity(  5000,     30, title="Annual Benefits"),    
-    sp.Future(   10000,    30, title="Salvage Value")
+    us.Annuity(  5000,     30, title="Power Savings")
 ])
+
+# Tax our project
+from PyEEA import TaxationHelper as th
+spep.add_tax(th.Tax("VAT", 0.25, title="Value-Added Tax"))
 
 # Valuate our project
 print("PROJECT VALUATIONS:")
