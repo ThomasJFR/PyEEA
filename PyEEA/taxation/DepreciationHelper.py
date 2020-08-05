@@ -118,20 +118,25 @@ class SumOfYearsDigits(Depreciation):
         return dps[0] if len(dps) == 1 else dps
 
 class DecliningBalance(Depreciation):
-    def __init__(self, cashflows, rate, d, salvage=0, title=None, tags=None):
+    def __init__(self, cashflows, rate, d, salvage=0, first_claim=1.00, title=None, tags=None):
         super().__init__(cashflows, d, salvage, title, tags)
         self.rate = rate
+        self._first_claim = first_claim
 
     def depreciation_at(self, ns):
         dps = []
         for n in ns:
             if self.d[0] < n <= self.d[1]:
                 year = n - self.d[0]
-                balance_now = (self.base - self.salvage) * (1 - self.rate) ** (year - 1)
-                expense = balance_now * self.rate
+                
+                balance = (self.base - self.salvage)
+                if year > 1:
+                    balance *= (1 - self.rate * self._first_claim)**(year > 1) * (1 - self.rate)**(year-2) 
+                expense = balance * self.rate * (self._first_claim)**(year == 1) 
+
                 if n == self.d[1]:  # Final year; adjust cashflow to achieve salvage
-                    adjustment = (balance_now - expense) + self.salvage
-                    expense += adjustment
+                    expense -= self.salvage
+
                 dps.append(Future(expense, n))
             else:
                 dps.append(NullCashflow())
