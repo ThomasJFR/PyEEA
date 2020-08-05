@@ -12,12 +12,12 @@ class SpreadsheetFeature(Enum):
 def write_csv(filename, project):
     import csv
 
-    titles = ["Period"] + [cf.get_title() for cf in project.get_cashflows()]
+    titles = ["Period"] + [cf.get_title() for cf in project.get_taxed_cashflows()]
     with open(filename, "w  ", newline="") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(titles)
 
-        for n in range(project.periods + 1):
+        for n in range(project._periods + 1):
             nextrow = ["n"]
             for cf in project[n]:
                 for title in titles:
@@ -52,23 +52,23 @@ def write_excel(filename, project, features=[]):
         row += 1
 
         ws.write(row, 0, "Interest", bld)
-        ws.write(row, 1, project.interest, pct)
+        ws.write(row, 1, project.get_interest(), pct)
         row += 2  # Add space between header and cashflow content
 
         # TITLES
-        cf_titles = [cf.get_title() for cf in project.get_cashflows()]
+        cf_titles = [cf.get_title() for cf in project.get_taxed_cashflows()]
         titles = ["Period", *cf_titles, *features]
         ws.write_row(row, 0, titles, bld)
         row += 1
 
         # PERIODS
-        period_col = list(range(project.periods + 1))
+        period_col = list(range(project._periods + 1))
         ws.write_column(row, col, period_col)
         col += 1
 
         # CASHFLOWS
-        for cashflow in project.get_cashflows():
-            cashflow_list = [cashflow[n].amount for n in range(project.periods + 1)]
+        for cashflow in project.get_taxed_cashflows():
+            cashflow_list = [cashflow[n].amount for n in range(project._periods + 1)]
             ws.write_column(row, col, cashflow_list, fin)
             if isinstance(cashflow, us.Perpetuity):
                 ws.write(row + len(cashflow_list), col, "...")
