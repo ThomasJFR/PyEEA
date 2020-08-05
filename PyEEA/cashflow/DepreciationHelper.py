@@ -11,7 +11,7 @@ class Depreciation(ABC):
 
     depreciation_id = 1  # Iterating counter used whenever a title isn't given
     
-    def __init__(self, d, cashflows, salvage=0, title=None, tags=None):
+    def __init__(self, cashflows, d, salvage=0, title=None, tags=None):
         """
         Author: Thomas Richmond
         Purpose:
@@ -36,7 +36,7 @@ class Depreciation(ABC):
                 "Depreciated cashflows are out of range of defined depreciation period!"
             )
         self.cashflows = cashflows
-        self.base = sum([cf.amount for cf in self.cashflows])
+        self.base = sum([cf.amount for cf in cashflows])
 
         self.title = title or (
             "%s %i " % (self.get_depreciation_name(), Depreciation.depreciation_id)
@@ -57,7 +57,7 @@ class Depreciation(ABC):
         For single payments, the value is zero unless the periods match
         """
         ns = parse_ns(val)
-        return self.cashflow_at(ns)
+        return self.depreciation_at(ns)
 
     def set_title(self, title):
         self.title = title
@@ -65,10 +65,13 @@ class Depreciation(ABC):
     def get_title(self):
         return self.title
 
+    def get_cashflows(self):
+        return self.cashflows
+
     @abstractmethod
-    def cashflow_at(self, ns):
+    def depreciation_at(self, ns):
         """
-        Parameters: ns [tuple(int)] - The periods to get the cashflows at.
+        Parameters: ns [tuple(int)] - The periods to get the value of depreciation at.
         """
         pass
 
@@ -90,103 +93,59 @@ class Depreciation(ABC):
 
 
 class StraightLine(Depreciation):
-    def __init__(self, d, cashflows, salvage=0, title=None, tags=None):
-        super().__init__(d, cashflows, salvage, title)
-        self.annual_expense = (self.base - self.salvage) / self.D
+    def __init__(self, cashflows, d, salvage=0, title=None, tags=None):
+        super().__init__(cashflows, d, salvage, title)
+        self.rate = 1 / self.D
 
-    def cashflow_at(self, ns):
+    def depreciation_at(self, ns):
         """
         Parameters: ns [tuple(int)] - The periods to get the cashflows at.
         """
-        cfs = []
-        for n in ns:
-            cfs.append(sum(self.cashflows) if n == self.d[0] else NullCashflow())
-        return cfs[0] if len(cfs) == 1 else cfs
-
-
-        """
+        dps = []
         for n in ns:
             if self.d[0] < n <= self.d[1]:
-                cfs.append(sp.Future(self.annual_expense, n))
+                expense = (self.base - self.salvage) * self.rate
+                dps.append(sp.Future(expense, n))
             else:
-                cfs.append(NullCashflow())
+                dps.append(NullCashflow())
 
-        return cfs[0] if len(cfs) == 1 else cfs
-        """
+        return dps[0] if len(dps) == 1 else dps
 
 class SumOfYearsDigits(Depreciation):
-    def __init_(self, d, cashflows, salvage=0, title=None, tags=None):
-        super().__init__(d, cashflows, salvage, title, tags)
+    def __init_(self, cashflows, d, salvage=0, title=None, tags=None):
+        super().__init__(cashflows, d, salvage, title, tags)
 
-    def cashflow_at(self, ns):
-        cfs = []
-        for n in ns:
-            cfs.append(sum(self.cashflows) if n == self.d[0] else NullCashflow())
-        return cfs[0] if len(cfs) == 1 else cfs
-
-
-        """
-        soyd = sum(range(self.D))
+    def depreciation_at(self, ns):
+        dps = []
+        soyd = sum(range(self.D + 1))
         for n in ns:
             if self.d[0] < n <= self.d[1]:
                 year = n - self.d[0]
-                rate = (self.D - year) / soyd
-                value = self.base * rate
-                cfs.append(sp.Future(value, n))
+                rate_now = (self.D - year) / soyd
+                expense = self.base * rate_now
+                dps.append(sp.Future(expense, n))
             else:
-                cfs.append(NullCashflow())
-        """
+                dps.append(NullCashflow())
 
-class DoubleDecliningBalance(Depreciation):
-    def __init__(self, rate, d, cashflows, salvage=0, title=None, tags=None):
-        super().__init__(d, cashflows, salvage, title, tags)
+        return dps[0] if len(dps) == 1 else dps
+
+class DecliningBalance(Depreciation):
+    def __init__(self, cashflows, rate, d, salvage=0, title=None, tags=None):
+        super().__init__(cashflows, d, salvage, title, tags)
         self.rate = rate
 
-    def cashflow_at(self, ns):
-        cfs = []
-        for n in ns:
-            cfs.append(sum(self.cashflows) if n == self.d[0] else NullCashflow())
-        return cfs[0] if len(cfs) == 1 else cfs
-        
-        """
-        for n in ns:
-            if self.d[0] < n <= self.d[1]:
-                balance = self.base * (1 - self.rate) ** (n - self.d[0] - 1)
-                expense = balance * self.rate
-                if n == self.d[1]:
-                    adjustment = (balance - expense) + self.salvage
-                    expense += (
-                        adjustment  # Final year; adjust cashflow to achieve salvage
-                    )
+    def depreciation_at(self, ns):
+        dps = []
+        if self.d[0] < n <= self.d[1]:
+            year = n - d[0]
+            balance_now = self.base * (1 - self.rate) ** (year - 1)
+            expense = balance_now * self.rate
+            if n == self.d[1]:  # Final year; adjust cashflow to achieve salvage
+                adjustment = (balance - expense) + self.salvage
+                expense += adjustment
+            dps.append(sp.Future(expense, n))
+        else:
+            dps.append(NullCashflow())
 
-                if n == 0:
-                    cfs.append(sp.Present(expense))
-                else:
-                    cfs.append(sp.Future(expense, n))
-            else:
-                cfs.append(NullCashflow())
+        return dps[0] if len(dps) == 1 else dps
 
-        return cfs[0] if len(cfs) == 1 else cfs
-        """
-
-"""
-class CapitalCostAllowance(DoubleDecliningBalance):
-    def __init__(self, rate, ucc_class)
-        pass
-    
-    def cashflow_at(self, ns):
-        cfs = []
-        for n in ns:
-            if self.d[0] < n <= self.d[1]:
-                balance = 0
-                for i in range(n + 1):
-                    purchases = sum([cf[i].amount for cf in self.cashflows if cf[i].amount < 0])
-                    additions = purchases
-
-                    dispositions = sum([cf[i].amount for cf in self.cashflows if cf[i].amount > 0])
-                    
-                    ucc = 0
-            else:
-                cfs.append(cashflows)
-
-"""
