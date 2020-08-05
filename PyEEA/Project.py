@@ -2,6 +2,7 @@ from scipy.optimize import fsolve
 from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
 from .cashflow import DepreciationHelper as dh
+from .cashflow import TaxationHelper as th
 from .cashflow import Cashflow, NullCashflow
 from .cashflow.utilities import parse_d, parse_ns
 
@@ -24,13 +25,15 @@ class Project:
     # TODO:
     #   Change behaviour for Depreciaton models to return cashflows instead of entire depreciation
     #       -- Should probably be implemented in get_cashflows
-    #   Change functions to use get_cashflows instead of self.cashflows
 
     def __init__(self, title=None, interest=0):
         self._title = title
         self._interest = interest
 
         self._cashflows = []
+        self._depreciations = []
+        self._taxes = []
+        
         self._periods = 0
 
     def __str__(self):
@@ -67,6 +70,7 @@ class Project:
                 [cf[n] for cf in get_cfs_for_period(n)]
                 for n in ns
             ]
+
             return cfs
 
     def __add__(self, other):
@@ -127,15 +131,6 @@ class Project:
     def set_interest(self, interest):
         self._interest = interest
 
-    def get_cashflows(self):
-        cashflows = []
-        for cf in self._cashflows:
-            if isinstance(cf, dh.Depreciation):
-                cashflows.extend(cf.cashflows)
-            else:
-                cashflows.append(cf)
-        return cashflows
-
     def add_cashflow(self, cashflow):
         """
         Author: Thomas Richmond
@@ -143,14 +138,16 @@ class Project:
         Parameters: cf [Cashflow] - A cashflow object
         Returns: The instance of Project, allowing for daisy-chaining
         """
+
+        if not isinstance(cashflow, Cashflow):
+            raise TypeError("Argument must be a child of Cashflow")
+
         self._cashflows.append(cashflow)
 
         def final_period(cf):
             if isinstance(cf, sp.Future):  # Also accounts for Present
                 return cf.n
             elif isinstance(cf, us.Annuity):
-                return cf.d[1]
-            elif isinstance(cf, dh.Depreciation):
                 return cf.d[1]
             else:
                 return 0
@@ -162,6 +159,18 @@ class Project:
 
         return self  # Daisy Chaining!
 
+    def add_depreciation(self, depreciation):
+        if not isinstance(depreciation, dh.Depreciation):
+            raise TypeError("Argument must be a child of Depreciation")
+        
+        self._depreciations.append(depreciation)
+        self.add_cashflows(depreciation.cashflows)
+
+        if depreciation.d[1] > self._periods:
+            self._periods = depreciation.d[1]
+        
+        return self 
+
     def add_cashflows(self, cashflows):
         """
         Author: Thomas Richmond
@@ -171,11 +180,22 @@ class Project:
         Returns: The instance of Project, allowing for daisy-chaining
         """
         for cashflow in cashflows:
-            self.add_cashflow(cashflow)
+            if isinstance(cashflow, Cashflow):
+                self.add_cashflow(cashflow)
+            elif isinstance(cashflow, dh.Depreciation):
+                self.add_depreciation(cashflow)
+            else:
+                raise TypeError("Cashflow type was not recognized!")
 
         return self
 
-    def add_tax(self, tag, rate):
+    def get_cashflows(self, taxed=True):
+        return self._cashflows
+
+    def get_depreciations():
+        return self._depreciations
+
+    def add_tax(self, tax):
         """
         Purpose:
             Adds cashflows to the project representing taxes.
@@ -184,7 +204,21 @@ class Project:
             tag [string] - Cashflows with a matching tag will be taxed
             rate [float] - A percent interest rate to apply
         """
-        pass
+        if not isinstance(tax, th.Tax):
+            raise TypeError("Argument must be a Tax instance!")
+        
+        tax.set_cashflow_binder(self.get_cashflows)
+        self._taxes.append(tax)
+
+        return self
+
+    def add_taxes(self, tag_rate_dict):
+        for tag in tag_rate_dict:
+            self.add_tax(tag, tag_rate_dict[tag])
+        return self
+
+    def get_taxes(self):
+        return self._taxes 
 
     def revenues(self):
         revenues = []
