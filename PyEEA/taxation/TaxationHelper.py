@@ -15,9 +15,7 @@ class Tax:
         return self._title
 
     def generate_cashflow(self, project):
-        def tax_fun(ns):
-            ns = parse_ns(ns)
-            
+        def tax_fun(n): 
             taxable_cashflows = [
                     cashflow
                     for cashflow in project.get_cashflows()
@@ -29,25 +27,21 @@ class Tax:
                     if self._tag in depreciation.tags
             ] or [NullCashflow()]
 
-            taxes = []
-            for n in ns:
-                taxable_sum = sum([
-                    cashflow[n] 
-                    for cashflow in taxable_cashflows
-                ])
-                if isinstance(taxable_sum, NullCashflow):
-                    taxes.append(taxable_sum)
-                    continue
+            taxable_sum = sum([
+                cashflow[n] 
+                for cashflow in taxable_cashflows
+            ])
+            if isinstance(taxable_sum, NullCashflow):
+                return taxable_sum
 
-                shielding_sum = sum([
-                    depreciation[n]
-                    for depreciation in shielding_depreciations
-                ])
+            shielding_sum = sum([
+                depreciation[n]
+                for depreciation in shielding_depreciations
+            ])
 
-                taxed_amount = (taxable_sum.amount + shielding_sum.amount) * self._rate
-                taxes.append(Future(taxed_amount, n))
+            taxed_amount = (taxable_sum.amount + shielding_sum.amount) * self._rate
+            return Future(taxed_amount, n)
             
-            return taxes
         return TaxCashflow(
             tax_fun, project._periods, 
             title=self.get_title(), shorthand="%s(%.2f%%)" % (self._tag, (self._rate * 100))
