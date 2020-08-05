@@ -7,7 +7,7 @@ class Tax:
         self._tag = tag
         self._rate = rate
         self._title = title or (
-                "%s %i " % (self.get_tax_name(), self._tag)
+                "Tax on %s" % self._tag
         )
 
     def get_title(self):
@@ -48,21 +48,21 @@ class Tax:
                 taxes.append(Future(taxed_amount, n))
             
             return taxes
-        return TaxCashflow(tax_fun, project._periods, title=self.get_title())
+        return TaxCashflow(
+            tax_fun, project._periods, 
+            title=self.get_title(), shorthand="%s(%.2f%%)" % (self._tag, (self._rate * 100))
+        )
  
-    @classmethod
-    def get_tax_name(cls):
-        return cls.__name__
-
 class TaxCashflow(Cashflow):
-    def __init__(self, tax_fun, d, title=None):
+    def __init__(self, tax_fun, d, title=None, shorthand=None):
         super().__init__(0, title)
         self._tax_fun = tax_fun
         self._d = parse_d(d)
         self._D = self._d[1] - self._d[0]
+        self._shorthand = shorthand 
 
     def to_shorthand(self):
-        return super().to_shorthand("Tax")
+        return self._shorthand
     
     def cashflow_at(self, ns):
         cfs = self._tax_fun(ns)
