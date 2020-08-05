@@ -54,6 +54,7 @@ class Project:
                 step = val.step or 1
                 ns = range(start, stop, step)
 
+            # TODO ADD SUPPORT FOR TAXATION
             def get_cashflows_for_period(n):
                 def do_include_cashflow(cf):
                     return any([
@@ -302,7 +303,7 @@ class Project:
                 "No interest provided for npw calculations.\nDid you mean to use set_interest(i)?"
             )
 
-        return sum([cf.to_pv(i or self._interest) for cf in self._cashflows]) or NullCashflow()
+        return sum([cf.to_pv(i or self._interest) for cf in self.get_taxed_cashflows()]) or NullCashflow()
 
     def nfw(self, n, i=None):
         return self.npw().to_fv(i or self._interest, n)
@@ -316,7 +317,7 @@ class Project:
         pvb, pvc = 0, 0
         for n in range(self._periods + 1):
             for cf in self[n]:
-                amt = cf.to_pv(i or self._interest).amount
+                amt = cf.to_pv(i or self.get_interest()).amount
                 if amt > 0:
                     pvb += amt
                 else:

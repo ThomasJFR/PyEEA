@@ -44,7 +44,6 @@ class Tax:
                     for depreciation in shielding_depreciations
                 ])
 
-                # Can become positive tax? i.e. we gain money? 
                 taxed_amount = (taxable_sum.amount - shielding_sum.amount) * self._rate
                 taxes.append(Future(taxed_amount, n))
             
