@@ -1,5 +1,5 @@
 from ..cashflow import Cashflow, NullCashflow
-from ..cashflow.SinglePaymentFactory import Future
+from ..cashflow import Future, Dynamic
 
 from ..utilities import parse_ns, parse_d
 
@@ -54,28 +54,13 @@ class Tax:
             title=self.get_title(), shorthand="%s(%.2f%%)" % (self._tag, (self._rate * 100))
         )
  
-class TaxCashflow(Cashflow):
+class TaxCashflow(Dynamic):
     def __init__(self, tax_fun, d, title=None, shorthand=None):
-        super().__init__(0, title)
-        self._tax_fun = tax_fun
-        self._d = parse_d(d)
-        self._D = self._d[1] - self._d[0]
-        self._shorthand = shorthand 
+        super().__init__(tax_fun, d, title)
+        self._shorthand = shorthand
 
     def to_shorthand(self):
         return self._shorthand
-    
-    def cashflow_at(self, ns):
-        cfs = self._tax_fun(ns)
-        return cfs[0] if len(cfs) == 1 else cfs
 
-    def to_pv(self, i):
-        return sum([self[n].to_pv(i) for n in range(self._d[0], self._d[1] + 1)])
-
-    def to_fv(self, i, n):
-        return self.to_pv(i).to_fv(i, n)
-
-    def to_av(self, i, d):
-        return self.to_pv(i).to_av(i, d)
     
 
