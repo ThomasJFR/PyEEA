@@ -13,7 +13,7 @@ class Annuity(Cashflow):
         cfs = []
         for n in ns:
             if self.d[0] < n <= self.d[1]:
-                cfs.append(sp.Future(self.amount, n))
+                cfs.append(sp.Future(self.amount, n, self.title, self.tags))
             else:
                 cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
@@ -32,23 +32,23 @@ class Annuity(Cashflow):
             pv = self.amount * present_worth_factor
 
         if self.d[0] == 0:  # PV is correct
-            return sp.Present(pv)
+            return sp.Present(pv, self.title, self.tags)
         else:  # If our annuity begins in the future, v is a FV and must
             # be converted to a PV.
-            return sp.Future(pv, self.d[0]).to_pv(i)
+            return sp.Future(pv, self.d[0], self.title, self.tags).to_pv(i)
 
     def to_fv(self, i, n):
         if self.d[0] == 0:  # Use standard formulas
             if self.d[1] == n:
                 fv = self.amount * ((1 + i) ** n - 1) / i
-                return sp.Future(fv, n)
+                return sp.Future(fv, n, self.title, self.tags)
             else:
                 return self.to_pv(i).to_fv(i, n)
         else:  # Annuity is not ordinary; convert to "Future Present Value", -
             # that is, the future value at the starting period of the annuity -
             # then to Present Value, then to Future Value
             fpv = self.amount * ((1 + i) ** self.dn - 1) / (i * (1 + i) ** self.dn)
-            return sp.Future(fpv, d[0]).to_pv(i).to_fv(i, n)
+            return sp.Future(fpv, d[0], self.title, self.tags).to_pv(i).to_fv(i, n)
 
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = parse_d(d)
@@ -73,7 +73,7 @@ class Gradient(Annuity):
         for n in ns:
             if self.d[0] < n <= self.d[1]:
                 fv = self.amount + self.G * (n - self.d[0] - 1)
-                cfs.append(sp.Future(fv, n))
+                cfs.append(sp.Future(fv, n, self.title, self.tags))
             else:
                 cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
@@ -87,9 +87,9 @@ class Gradient(Annuity):
         )  # Gradient Term
         pv = pv1 + pv2
         if self.d[0] == 0:  # Requested gradient is equivalet to this instance
-            return sp.Present(pv)
+            return sp.Present(pv, self.title, self.tags)
         else:  # The gradient starts at n > 0, so we need to convert a "future present value" to a present value
-            return sp.Future(pv, d[0]).to_pv(i)
+            return sp.Future(pv, d[0], self.title, self.tags).to_pv(i)
 
     def to_fv(self, i, n):
         return self.to_pv(i).to_fv(i, n)
@@ -100,7 +100,7 @@ class Gradient(Annuity):
 
         if d == self.d and d[0] == 0:  # Use standard formula
             A_eq = self.amount + G * (1 / i - D / ((1 + i) ** n - 1))
-            return Annuity(A_eq)
+            return Annuity(A_eq, d, self.title, self.tags)
         else:
             return self.to_pv(i).to_av(i, d)
 
@@ -118,7 +118,7 @@ class Geometric(Annuity):
         for n in ns:
             if self.d[0] < n <= self.d[1]:
                 fv = self.amount * (1 + self.g) ** (n - self.d[0] - 1)
-                cfs.append(sp.Future(fv, n))
+                cfs.append(sp.Future(fv, n, self.title, self.tags))
             else:
                 cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
@@ -128,9 +128,9 @@ class Geometric(Annuity):
             xv = self.amount * self.D * (1 + i) ** -1
 
             if self.d[0] == 0:
-                return sp.Present(xv)
+                return sp.Present(xv, self.title, self.tags)
             else:
-                return sp.Future(xv, self.d[0]).to_pv(i)
+                return sp.Future(xv, self.d[0], self.title, self.tags).to_pv(i)
         else:
             xv = (
                 self.amount
@@ -139,9 +139,9 @@ class Geometric(Annuity):
             )
 
             if self.d[0] == 0:
-                return sp.Present(xv)
+                return sp.Present(xv, self.title, self.tags)
             else:
-                return sp.Future(xv, self.d[0]).to_pv(i)
+                return sp.Future(xv, self.d[0], self.title, self.tags).to_pv(i)
         #else:
          #   raise ValueError("Geometric rate (g) cannot exceed interest rate (i)!")
 
@@ -177,7 +177,7 @@ class Perpetuity(Cashflow):
         cfs = []
         for n in ns:
             if n > self.d0:
-                cfs.append(sp.Future(self.amount, n))
+                cfs.append(sp.Future(self.amount, n, self.title, self.tags))
             else:
                 cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
@@ -185,9 +185,9 @@ class Perpetuity(Cashflow):
     def to_pv(self, i):
         xv = self.amount / i
         if self.d0 > 0:
-            return sp.Future(xv, self.d0).to_pv(i)
+            return sp.Future(xv, self.d0, self.title, self.tags).to_pv(i)
         else:
-            return sp.Present(xv)
+            return sp.Present(xv, self.title, self.tags)
 
     def to_fv(self, i, n):
         return self.to_pv(i).to_fv(i, n)
@@ -211,7 +211,7 @@ class GeoPerpetuity(Perpetuity):
         for n in ns:
             if n > self.d0:
                 fv = self.amount * (1 + self.g) ** (n - self.d0 - 1)
-                cfs.append(sp.Future(fv, n))
+                cfs.append(sp.Future(fv, n, self.title, self.tags))
             else:
                 cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
@@ -224,6 +224,6 @@ class GeoPerpetuity(Perpetuity):
 
         xv = self.amount / (i - self.g)
         if self.d0 > 0:
-            return sp.Future(xv, n)
+            return sp.Future(xv, n, self.title, self.tags)
         else:
-            return sp.Present(xv)
+            return sp.Present(xv, self.title, self.tags)
