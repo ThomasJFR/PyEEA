@@ -1,5 +1,5 @@
 from . import Cashflow
-from ..utilities import parse_d
+from ..utilities import parse_d, parse_ns
 
 class Dynamic(Cashflow):
     def __init__(self, amount_fun, d, title=None, tags=None):
@@ -13,7 +13,10 @@ class Dynamic(Cashflow):
         return super().to_shorthand()
     
     def cashflow_at(self, ns):
-        cashflows = self._amount_fun(ns)
+        ns = parse_ns(ns)
+        cashflows = []
+        for n in ns:
+            cashflows.append(self._amount_fun(n))
         return cashflows[0] if len(cashflows) == 1 else cashflows
 
     def to_pv(self, i):
