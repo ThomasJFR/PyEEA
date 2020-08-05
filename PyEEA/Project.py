@@ -125,6 +125,9 @@ class Project:
     def set_interest(self, interest):
         self._interest = interest
 
+    def get_interest(self):
+        return self._interest
+
     def add_cashflow(self, cashflow):
         """
         Author: Thomas Richmond
