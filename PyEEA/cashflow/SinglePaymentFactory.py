@@ -56,7 +56,7 @@ class Future(Cashflow):
             av = self.amount * sinking_fund_factor
             return Annuity(av, d, self.title, self.tags)
         else:
-            av = self.to_pv(i).to_av(i, d)
+            return self.to_pv(i).to_av(i, d)
 
 
 class Present(Future):
