@@ -8,6 +8,10 @@ from .taxation import TaxationHelper as th, DepreciationHelper as dh
 
 from .utilities import parse_d, parse_ns
 
+from matplotlib.cm import get_cmap
+name = "tab20"
+cmap = get_cmap(name)  # type: matplotlib.colors.ListedColormap
+tab20 = cmap.colors  # type: list
 
 class Project:
     """
@@ -244,7 +248,7 @@ class Project:
 
         periods = list(range((n or self._periods) + 1))
         titles = [cf.get_title() for cf in self.get_taxed_cashflows()]
-        cashflows = [[cf[n] for cf in self.get_taxed_cashflows()] for n in periods]
+        cashflows = [[str(cf[n]).split('(')[0] for cf in self.get_taxed_cashflows()] for n in periods]
         
         return pd.DataFrame(cashflows, index=periods, columns=titles)
 
@@ -257,10 +261,11 @@ class Project:
         cashflows = [[cf[n].amount for cf in self.get_taxed_cashflows()] for n in periods]
 
         plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
-        plotdata.plot(kind="bar", stacked="true")
-        plt.title(self.get_title())
-        plt.ylabel("USD")
-        plt.xlabel("Period")
+        ax = plotdata.plot(kind="bar", stacked="true", color=tab20)
+        ax.set_title(self.get_title())
+        ax.set_ylabel("USD")
+        ax.set_xlabel("Period")
+        ax.axhline()
 
         if size:
             fig = plt.gcf()
@@ -300,13 +305,16 @@ class Project:
                 return n
         return -1
 
-    def npw(self, i=None):
+    def npw(self, i=None, after_tax=True):
         if i is None and self._interest is None:
             raise ValueError(
                 "No interest provided for npw calculations.\nDid you mean to use set_interest(i)?"
             )
 
-        return sum([cf.to_pv(i or self._interest) for cf in self.get_taxed_cashflows()]) or NullCashflow()
+        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        npw_cashflow = sum([cf.to_pv(i or self._interest) for cf in cashflows]) or NullCashflow()
+        npw_cashflow.set_title("Net Present Worth")
+        return npw_cashflow
 
     def nfw(self, n, i=None):
         return self.npw().to_fv(i or self._interest, n)
@@ -331,9 +339,11 @@ class Project:
 
         return abs(pvb / pvc)
 
-    def eacf(self, d=None):
+    def eacf(self, d=None, i=None, after_tax=True):
         d = parse_d(d or self._periods)
-        return self.npw().to_av(self._interest, d)
+        eacf_cashflow = self.npw(i, after_tax).to_av(self._interest, d)
+        eacf_cashflow.set_title("Equivalent Annual Cashflow")
+        return eacf_cashflow
 
     def irr(self, *, return_all=False, default=None):
         if not all(
