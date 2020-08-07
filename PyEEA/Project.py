@@ -29,8 +29,8 @@ class Project:
     """
 
     def __init__(self, title=None, interest=0):
-        self._title = title
-        self._interest = interest
+        self._title = str(title)
+        self._interest = float(interest)
 
         self._cashflows = []
         self._depreciations = []
