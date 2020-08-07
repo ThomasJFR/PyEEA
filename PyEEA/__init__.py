@@ -2,8 +2,9 @@
 from .Project import Project
 
 from .cashflow import Cashflow, NullCashflow
+
 from .cashflow import SinglePaymentFactory
-from .cashflow import UniformSeriesFactory
+from .cashflow import UniformSeriesFactory 
 from .cashflow import DynamicSeriesFactory
 
 from .taxation import DepreciationHelper
