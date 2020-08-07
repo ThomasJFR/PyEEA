@@ -31,12 +31,8 @@ class Cashflow(ABC):
     cashflow_id = 1  # Iterating counter used whenever a title isn't given
 
     def __init__(self, amount, title=None, tags=None):
-        if not isinstance(amount, Number):
-            print(amount, type(amount))
-            raise TypeError("Value must be numeric!")
-
-        self.amount = amount
-        self.title = title or (
+        self.amount = float(amount)
+        self.title = str(title) if title is not None else or (
             "%s %i " % (self.get_cashflow_name(), Cashflow.cashflow_id)
         )
         if not tags:  # If falsey, just give an empty list
