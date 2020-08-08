@@ -1,7 +1,7 @@
 from .Cashflow import Cashflow, NullCashflow, PaymentScheme as ps
 from .UniformSeriesFactory import Annuity
 from ..utilities import parse_d
-
+from numbers import Number
 
 class Future(Cashflow):
     """
@@ -26,6 +26,23 @@ class Future(Cashflow):
             raise ArithmeticError(
                 "Cannot add two Single cashflows occurring at different periods!"
             )
+
+    def __mul__(self, other):
+        if isinstance(other, Number):
+            return Future(self.amount * other, self.n, self.title, self.tags)
+
+    def __lt__(self, them):
+        return self.amount < them.amount
+
+    def __le__(self, them):
+        return self.amount <= them.amount
+
+    def __gt__(self, them):
+        return self.amount > them.amount
+
+    def __ge__(self, them):
+        return self.amount >= them.amount
+
 
     def cashflow_at(self, ns):
         cfs = [self if n == self.n else NullCashflow() for n in ns]
@@ -68,6 +85,10 @@ class Present(Future):
 
     def __init__(self, amount, title=None, tags=None):
         super().__init__(amount, 0, title, tags)
+
+    def __mul__(self, other):
+        if isinstance(other, Number):
+            return Present(self.amount * other, self.title, self.tags)
 
     def to_shorthand(self):
         """
