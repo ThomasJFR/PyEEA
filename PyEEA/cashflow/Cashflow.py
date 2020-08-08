@@ -32,7 +32,7 @@ class Cashflow(ABC):
 
     def __init__(self, amount, title=None, tags=None):
         self.amount = float(amount)
-        self.title = str(title) if title is not None else or (
+        self.title = str(title) if title is not None else (
             "%s %i " % (self.get_cashflow_name(), Cashflow.cashflow_id)
         )
         if not tags:  # If falsey, just give an empty list
