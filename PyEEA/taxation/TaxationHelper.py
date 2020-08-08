@@ -39,7 +39,7 @@ class Tax:
                 for depreciation in shielding_depreciations
             ])
 
-            taxed_amount = (taxable_sum.amount + shielding_sum.amount) * self._rate
+            taxed_amount = -(taxable_sum.amount + shielding_sum.amount) * self._rate
             return Future(taxed_amount, n)
             
         return TaxCashflow(
