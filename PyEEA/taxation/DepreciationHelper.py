@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from abc import ABC, abstractmethod
 
 from ..cashflow import Cashflow, NullCashflow
-from ..cashflow.SinglePaymentFactory import Future
+from ..cashflow.SinglePaymentFactory import Present, Future
 
 from ..utilities import parse_d, parse_ns
 
@@ -128,13 +128,18 @@ class DecliningBalance(Depreciation):
         for n in ns:
             if self.d[0] < n <= self.d[1]:
                 year = n - self.d[0]
+                balance = self.base + self.salvage
                 
-                balance = (self.base - self.salvage)
-                if year > 1:
-                    balance *= (1 - self.rate * self._first_claim)**(year > 1) * (1 - self.rate)**(year-2) 
-                expense = balance * self.rate * (self._first_claim)**(year == 1) 
+                # Purchase
+                expense = balance * self.rate * self._first_claim
+                
+                # Depreciations
+                for y in range(year-1):
+                    balance -= expense
+                    expense = balance * self.rate
 
-                if n == self.d[1]:  # Final year; adjust cashflow to achieve salvage
+                # Salvage
+                if year == self.D:
                     expense -= self.salvage
 
                 dps.append(Future(expense, n))
