@@ -49,7 +49,7 @@ class Tax:
  
 class TaxCashflow(Dynamic):
     def __init__(self, tax_fun, d, title=None, shorthand=None):
-        super().__init__(0, tax_fun, d, title)
+        super().__init__(tax_fun, d, title)
         self._shorthand = shorthand
 
     def to_shorthand(self):
