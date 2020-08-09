@@ -27,6 +27,19 @@ class Future(Cashflow):
                 "Cannot add two Single cashflows occurring at different periods!"
             )
 
+    def __sub__(self, other):
+        if not all([isinstance(self, Future), isinstance(other, Future)]):
+            return NotImplemented
+        if self.n == other.n:
+            val = self.amount - other.amount
+            return Future(val, self.n, self.title, self.tags) if self.n > 0 else Present(val, self.title, self.tags)
+        else:
+            raise ArithmeticError(
+                "Cannot add two Single cashflows occurring at different periods!"
+            )
+
+
+
     def __mul__(self, other):
         if isinstance(other, Number):
             return Future(self.amount * other, self.n, self.title, self.tags)
