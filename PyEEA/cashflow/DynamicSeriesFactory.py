@@ -2,8 +2,8 @@ from . import Cashflow
 from ..utilities import parse_d, parse_ns
 
 class Dynamic(Cashflow):
-    def __init__(self, amount_fun, d, title=None, tags=None):
-        super().__init__(0, title, tags)
+    def __init__(self, amount, amount_fun, d, title=None, tags=None):
+        super().__init__(amount, title, tags)
         self._amount_fun = amount_fun
         self._d = parse_d(d)
         self._D = self._d[1] - self._d[0]
@@ -16,7 +16,7 @@ class Dynamic(Cashflow):
         ns = parse_ns(ns)
         cashflows = []
         for n in ns:
-            cashflows.append(self._amount_fun(n))
+            cashflows.append(self._amount_fun(self.amount, n))
         return cashflows[0] if len(cashflows) == 1 else cashflows
 
     def to_pv(self, i):
