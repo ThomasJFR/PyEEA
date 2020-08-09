@@ -69,7 +69,7 @@ class Project:
                 return [cf for cf in self.get_cashflows() if do_include_cashflow(cf)]
             
             cashflows = [[cf[n] for cf in get_cashflows_for_period(n)] for n in ns]
-            return cashflows
+            return cashflows[0] if len(cashflows) == 1 else cashflows
 
     def __add__(self, other):
         agg = Project()
