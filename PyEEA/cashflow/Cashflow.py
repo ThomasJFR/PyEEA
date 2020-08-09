@@ -27,7 +27,7 @@ class Cashflow(ABC):
                               information on the context of the cashflow.
                               Titles are included as a tag by default.
     """
-
+    CURRENCY_FMT_STR = "${:,.2f}"
     cashflow_id = 1  # Iterating counter used whenever a title isn't given
 
     def __init__(self, amount, title=None, tags=None):
@@ -84,8 +84,8 @@ class Cashflow(ABC):
     def to_shorthand(self, info):
         # Step 1: Add the cash amount
         # EXAMPLE: -$12,229,999.99
-        valstr = "{}${:,.2f}".format("-" if self.amount < 0 else " ", abs(self.amount))
-
+        valstr = Cashflow.CURRENCY_FMT_STR.format(self.amount)
+        valstr = valstr.replace('$-','-$')
         # Step 2: Add notated information
         # EXAMPLE: (G, [2,5], 210)
         info = (
