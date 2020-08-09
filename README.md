@@ -5,39 +5,54 @@ A Python3 library for performing engineering economics analysis. Styled using [B
 
 Developed by Thomas Richmond with help from MArkos Frazzer.
 
-### Example
+## Features
 
+#### Define Projects using Cashflows
 ``` Python
-# Create a project that uses an interest rate
 from PyEEA import Project
-spep = Project("Solar Plant Expansion Project", interest=0.10)
-
-# Model our project using various cashflow models
 from PyEEA import SinglePaymentFactory as sp
 from PyEEA import UniformSeriesFactory as us
+
+project = Project("Solar Plant Expansion Project", interest=0.10)
+
+# Model projects using cashflow models
+project.add_cashflow(sp.Present(-2500,  title="Raw Materials Purchase"))
+
+# Add multiple cashflows at once!
+project.add_cashflows([
+    us.Annuity(-200, 5, title="Annual Pamphlet Costs")
+    sp.Future(1000,  5, title="Sold Business Renevue")
+])
+```
+
+#### Taxation and Tax Shields
+
+``` Python
 from PyEEA import DepreciationHelper as dh
-spep.add_cashflows([
-    # Capital Costs
-    dh.DecliningBalance([
-        sp.Present( -50000,        title="New Panel Cost", tags="VAT"),
-        sp.Present( -6000,         title="Installation Cost", tags="VAT")],
-        0.40, 30, salvage=10000, title="Capital Expenses", tags="VAT")
-    
-    # Ongoing Costs
-    us.Gradient(-1500, 50, 30, title="Maintenance Cost"),
-    us.Annuity(  5000,     30, title="Power Savings")
+
+capital_expenses = [
+    sp.Present(-50000, title="High-Cost Tool"),
+    sp.Present(-1600,  title="Installation Fees")
+]
+
+# Depreciate using a declining balance model over five years at 20% with a salvage value of $100
+project.add_cashflows([
+    dh.DecliningBalance(capital_expenses, 0.20, 5, salvage=100,
+                        title="Asset Purchase and Setup", tags="VAT")
 ])
 
-# Tax our project
+# Add 25% VAT tax to project
 from PyEEA import TaxationHelper as th
-spep.add_tax(th.Tax("VAT", 0.25, title="Value-Added Tax"))
 
-# Valuate our project
-print("PROJECT VALUATIONS:")
-print("\tNet Present Worth:", spep.npw())        # -$18,578.88(P)
-print("\tBenefit-Cost Ratio:", spep.bcr())       # 0.71971860...
-print("\tInternal Rate of Return:", spep.irr())  # 0.06153851...
-print("\tModified IRR:", spep.mirr())            # 0.08531792...
+project.add_tax(th.Tax("VAT", 0.25, title="Value-Added Tax"))
+```
+
+#### Visualize & Export Projects
+
+``` Python
+# Visualize our projects
+project.to_dataframe()  # Using pandas
+project.to_cashflowdiagram()  # Using matplotlib
 
 # Export our project as an Excel file
 from PyEEA.output import write_excel, SpreadsheetFeature as ssft
@@ -45,9 +60,33 @@ write_excel("SPEP_Finances.xlsx", spep,
             features=[ssft.NPW, ssft.CNPW])
 ```
 
-The above code outputs the following spreadsheet:
+#### Perform Valuation of Projects
 
-<img align='center' src='./assets/SampleSpreadsheetOutput.png' alt=''/>
+``` Python
+project.npw()   # Net Present Worth
+project.nfw()   # Net Future Worth
+project.bcr()   # Benefit-to-Cost Ratio
+project.irr()   # Internal Rate of Return
+project.mirr()  # Modified IRR
+```
+
+#### Perform Project Analysis
+
+``` Python
+# Sensativity Analysis
+from PyEEA import sensativity_analysis
+
+sens_factors = [0.70, 0.85, 1.00, 1.15, 1.30]
+npws = sensitivity_analysis(project, sens_factors)
+irrs = sensitivity_analysis(project, sens_factors, valuator=project.irr)
+
+# Simulation Analysis
+from PyEEA import simulation_analysis
+
+sim_eacfs = simulation_analysis(project, {
+        "Annual Pamphlet Costs": 0.10
+    }, valuator=project.eacf)
+```
 
 ## Installation
 
