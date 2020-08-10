@@ -45,17 +45,26 @@ class Future(Cashflow):
             return Future(self.amount * other, self.n, self.title, self.tags)
 
     def __lt__(self, them):
-        return self.amount < them.amount
+        if isinstance(them, Cashflow):
+            them = them.amount
+        else:
+            them = float(them)
+        
+        return self.amount < them
 
     def __le__(self, them):
-        return self.amount <= them.amount
+        if isinstance(them, Cashflow):
+            them = them.amount
+        else:
+            them = float(them)
+            
+        return self.amount <= them
 
     def __gt__(self, them):
-        return self.amount > them.amount
+        return not self.__le__(them)
 
     def __ge__(self, them):
-        return self.amount >= them.amount
-
+        return not self.__lt__(them)
 
     def cashflow_at(self, ns):
         cfs = [self if n == self.n else NullCashflow() for n in ns]
