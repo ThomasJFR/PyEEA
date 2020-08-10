@@ -3,7 +3,7 @@ from scipy.optimize import fsolve
 from .cashflow import Cashflow, NullCashflow
 from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
-
+from .cashflow import DynamicSeriesFactory as ds
 from .taxation import TaxationHelper as th, DepreciationHelper as dh
 
 from .utilities import parse_d, parse_ns
@@ -65,6 +65,7 @@ class Project:
                         isinstance(cf, sp.Future) and n == cf.n,
                         isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
                         isinstance(cf, us.Perpetuity) and n > cf.d0,
+                        isinstance(cf, ds.Dynamic) and cf.d[0] < n <= cf.d[1],
                     ])
                 return [cf for cf in self.get_cashflows() if do_include_cashflow(cf)]
             
@@ -149,6 +150,8 @@ class Project:
             if isinstance(cf, sp.Future):  # Also accounts for Present
                 return cf.n
             elif isinstance(cf, us.Annuity):
+                return cf.d[1]
+            elif isinstance(cf, ds.Dynamic):
                 return cf.d[1]
             else:
                 return 0
