@@ -4,7 +4,10 @@ from .cashflow import Cashflow, NullCashflow
 from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
 from .cashflow import DynamicSeriesFactory as ds
+
 from .taxation import TaxationHelper as th, DepreciationHelper as dh
+
+from .valuation import npw, nfw, bcr, irr, mirr
 
 from .utilities import parse_d, parse_ns
 
@@ -275,109 +278,59 @@ class Project:
             fig.set_size_inches(size)
 
     #################################
-    ### PROJECT VALUATION FUNCTIONS
+    ### PROJECT VALUATION HELPERS
     ###
 
-    def get_ncfs(self):
-        """
-        Author: Thomas Richmond
-        Purpose: Gets the net cashflow for every period of the project.
-        Returns: An array of net cashflows throughout the whole project
-        """
-        ncfs = []
-        for n in range(self._periods + 1):
-            cfs = self[n]  # Get the cashflows for this period
-            if len(cfs) == 0:
-                ncfs.append(NullCashflow())
-                continue
-
-            ncf = sum([cf[n] for cf in cfs]) or NullCashflow()
-            ncfs.append(ncf)
-
-        return ncfs
-
-    def pbp(self):
-        """
-        Purpose: Get the payback period for the project.
-                 Does not account for time value of money.
-        """
-        cfsum = 0
-        for n in range(self._periods + 1):
-            cfsum += sum(cf.amount for cf in self[n])
-            if cfsum > 0:
-                return n
-        return -1
-
     def npw(self, i=None, after_tax=True):
-        if i is None and self._interest is None:
+        i = i if i is not None else self.get_interest()
+        if i is None:
             raise ValueError(
-                "No interest provided for npw calculations.\nDid you mean to use set_interest(i)?"
+                "No interest provided for npw calculations."
+                "Did you mean to use set_interest(i)?"
+            )
+        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        return npw(cashflow, i)
+
+    def nfw(self, n, i=None, after_tax=True):
+        i = i if i is not None else self.get_interest()
+        if i is None:
+            raise ValueError(
+                "No interest provided for nfw calculations."
+                "Did you mean to use set_interest(i)?"
+            )
+        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        return nfw(cashflows, i, n)
+
+    def eacf(self, d=None, i=None, after_tax=True):
+        i = i if i is not None else self.get_interest()
+        if i is None:
+            raise ValueError(
+                "No interest provided for eacf calculations."
+                "Did you mean to use set_interest(i)?"
+            )
+        d = d if d is not None else self._periods
+        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        return eacf_cashflow(cashflows, i, d)
+
+
+    def bcr(self, after_tax=True):
+        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        return bcr(cashflows)
+
+    def irr(self, i0=None, after_tax=True):
+        i0 = i0 if i0 is not None else self.get_interest()
+        if i is None:
+            raise ValueError(
+                "No initial interest guess provided for irr calculations."
+                "Did you mean to use set_interest(i)?"
             )
 
         cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
-        npw_cashflow = sum([cf.to_pv(i or self._interest) for cf in cashflows]) or NullCashflow()
-        npw_cashflow.set_title("Net Present Worth")
-        return npw_cashflow
+        return irr(cashflows, i0)
 
-    def nfw(self, n, i=None):
-        return self.npw().to_fv(i or self._interest, n)
-
-    def bcr(self, i=None):
-        if self._interest == None and i == None:
-            raise ValueError(
-                "No interest provided for bcr calculations. \nDid you mean to use set_interest(i)?"
-            )
-
-        pvb, pvc = 0, 0
-        for n in range(self._periods + 1):
-            for cf in self[n]:
-                amt = cf.to_pv(i or self.get_interest()).amount
-                if amt > 0:
-                    pvb += amt
-                else:
-                    pvc += amt
-
-        if pvb == 0 or pvc == 0:
-            return 0
-
-        return abs(pvb / pvc)
-
-    def eacf(self, d=None, i=None, after_tax=True):
-        d = parse_d(d or self._periods)
-        eacf_cashflow = self.npw(i, after_tax).to_av(self._interest, d)
-        eacf_cashflow.set_title("Equivalent Annual Cashflow")
-        return eacf_cashflow
-
-    def irr(self, *, return_all=False, default=None):
-        if not all(
-            [  # Make sure we have both positive and negative net cashflows; else, IRR doesn't exist
-                any([(sum(cfs) or NullCashflow()).amount > 0 for cfs in self[:]]),
-                any([(sum(cfs) or NullCashflow()).amount < 0 for cfs in self[:]])
-            ]
-        ):
-            return default
-
-        def irr_fun(i):
-            return self.npw(i[0]).amount
-
-        irrs = fsolve(irr_fun, self._interest, factor=0.1)
-        return irrs if return_all is True else irrs[0]
-
-    def mirr(self, e_inv=None, e_fin=None):
-        ncfs = self.get_ncfs()
-
-        fvb = sum(
-            [
-                ncf.to_fv(e_fin or self._interest, self._periods)
-                for ncf in ncfs
-                if ncf.amount > 0
-            ]
-        ) or sp.Future(0, self._periods)
-        pvc = sum(
-            [ncf.to_pv(e_inv or self._interest) for ncf in ncfs if ncf.amount < 0]
-        ) or sp.Present(0)
-
-        return fsolve(lambda i: (fvb.to_pv(i) + pvc).amount, self._interest, factor=0.1)[
-            0
-        ]
+    def mirr(self, e_inv=None, e_fin=None, after_tax=True):
+        e_inv = e_inv if e_inv is not None else self.get_interest()
+        e_fin = e_fin if e_fin is not None else self.get_interest()
+        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        return mirr(cashflows, e_inv, e_fin)
 
