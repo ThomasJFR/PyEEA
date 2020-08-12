@@ -1,3 +1,6 @@
+from ..cashflow import Present, Future, Annuity, Dynamic
+from ..taxation import Deprecation
+
 def parse_d(d):
     """
     Author: Thomas Richmond
@@ -48,3 +51,23 @@ def parse_ns(val):
         ns = range(start, stop, step)
 
     return ns
+
+def get_last_period(cashflows, ignore_perpetuities=True):
+    def final_period(cf):
+        if isinstance(cf, Future):  # also accounts for present
+            return cf.n
+        elif isinstance(cf, Annuity):
+            return cf.d[1]
+        elif isinstance(cf, Perpetuity):
+            return 0 if ignore_perpetuities else float('inf')
+        elif isinstance(cf, Dynamic):
+            return cf.d[1]
+        elif isinstance(cf, Depreciation):
+            return cf.d[1]
+        else:
+            return 0
+    max_n = final_period()
+    for cashflow in cashflows:
+        n = final_period(cashflow)
+        max_n = n if n > max_n
+    return max`_n
