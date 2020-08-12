@@ -9,6 +9,15 @@ class Annuity(Cashflow):
         self.d = parse_d(d)  # The start and end period of the annuity
         self.D = self.d[1] - self.d[0]  # The number of periods for the annuity
 
+    def __add__(self, other):
+        if not all([isinstance(self, Future), isinstance(other, Future)]):
+            return NotImplemented
+        if self.n == other.n:
+            val = self.amount + other.amount
+            return Annuity(val, self.d, self.title, self.tags) 
+        else:
+            return ValueError("Added annuities must have equal durations")
+
     def cashflow_at(self, ns):
         cfs = []
         for n in ns:
