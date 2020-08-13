@@ -178,6 +178,15 @@ class Perpetuity(Cashflow):
         if type(d0) is not int:
             raise TypeError("Parameter d0 must be an integer!")
         self.d0 = d0
+    
+    def __add__(self, other):
+        if not all([type(self) == Perpetuity, type(other) == Perpetuity]):
+            return NotImplemented
+        if self.d0 == other.d0:
+            val = self.amount + other.amount
+            return Perpetuity(val, self.d0, self.title, self.tags) 
+        else:
+            return ValueError("Added annuities must have equal durations")
 
     def to_shorthand(self, alt=None):
         return super().to_shorthand(alt or ("A", "[{}, inf]".format(self.d0)))
