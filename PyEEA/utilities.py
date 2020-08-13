@@ -1,5 +1,3 @@
-from ..cashflow import Present, Future, Annuity, Dynamic
-from ..taxation import Deprecation
 
 def parse_d(d):
     """
@@ -53,6 +51,8 @@ def parse_ns(val):
     return ns
 
 def get_last_period(cashflows, ignore_perpetuities=True):
+    from .cashflow import Present, Future, Annuity, Perpetuity, Dynamic
+    from .taxation import Depreciation
     def final_period(cf):
         if isinstance(cf, Future):  # also accounts for present
             return cf.n
@@ -66,8 +66,8 @@ def get_last_period(cashflows, ignore_perpetuities=True):
             return cf.d[1]
         else:
             return 0
-    max_n = final_period()
+    max_n = 0
     for cashflow in cashflows:
         n = final_period(cashflow)
-        max_n = n if n > max_n
-    return max`_n
+        max_n = n if n > max_n else max_n
+    return max_n
