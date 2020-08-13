@@ -10,9 +10,9 @@ class Annuity(Cashflow):
         self.D = self.d[1] - self.d[0]  # The number of periods for the annuity
 
     def __add__(self, other):
-        if not all([isinstance(self, Future), isinstance(other, Future)]):
+        if not all([type(self) == Annuity, type(other) == Annuity]):
             return NotImplemented
-        if self.n == other.n:
+        if self.d == other.d:
             val = self.amount + other.amount
             return Annuity(val, self.d, self.title, self.tags) 
         else:
@@ -106,9 +106,9 @@ class Gradient(Annuity):
     def to_av(self, i, d):
         d = parse_d(d)
         D = d[1] - d[0]
-
+    
         if d == self.d and d[0] == 0:  # Use standard formula
-            A_eq = self.amount + G * (1 / i - D / ((1 + i) ** n - 1))
+            A_eq = self.amount + self.G * (1 / i - D / ((1 + i) ** (D - d[0]) - 1))
             return Annuity(A_eq, d, self.title, self.tags)
         else:
             return self.to_pv(i).to_av(i, d)
