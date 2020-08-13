@@ -312,6 +312,16 @@ class Project:
         cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
         return eacf(cashflows, i, d)
 
+    def epcf(self, d0=0, i=None, after_tax=True):
+        i = i if i is not None else self.get_interest()
+        if i is None:
+            raise ValueError(
+                "No interest provided for eacf calculations."
+                "Did you mean to use set_interest(i)?"
+            )
+        
+        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        return epcf(cashflows, i, d0)
 
     def bcr(self, after_tax=True):
         cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
