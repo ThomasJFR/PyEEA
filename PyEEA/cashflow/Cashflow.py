@@ -135,6 +135,21 @@ class NullCashflow(Cashflow):
     def __add__(self, other):
         return other
 
+    def __lt__(self, them):
+        them = float(them)
+        return self.amount < them
+
+    def __le__(self, them):
+        them = float(them)    
+        return self.amount <= them
+
+    def __gt__(self, them):
+        return not self.__le__(them)
+
+    def __ge__(self, them):
+        return not self.__lt__(them)
+
+
     def to_shorthand(self):
         return super().to_shorthand(("N",))
 
