@@ -1,5 +1,6 @@
-from ..cashflow import NullCashflow, Present, Future, Annuity
+from ..cashflow import NullCashflow, Present, Future, Annuity, Perpetuity
 from ..utilities import parse_d, get_last_period
+from typing import Union
 
 def npw(cashflows, i, title=None) -> Present:
     npw = sum([cf.to_pv(i) for cf in cashflows]) or NullCashflow()
@@ -11,11 +12,16 @@ def nfw(cashflows, i, n, title=None) -> Future:
     npw.set_title(title or f"Net Future Worth")
     return nfw
 
-def eacf(cashflows, i, d, title=None) -> Annuity:
+def eacf(cashflows, i, d, title=None) -> Union[Annuity, Perpetuity]:
     d = parse_d(d)
-    eacf = sum([cf.to_av(i, d) for cf in cashflows]) or NullCashflow()
-    eacf.set_title(title or "Equivalent Annual Cashflow")
-    return eacf
+    if all([isinstance(cf, Perpetuity) for cf in cashflows]):
+        eacf = sum([perpetuity for perpetuity in cashflows])
+        eacf.set_title(title or "Equivalent Perpetual Annual Cashflow")
+        return eacf
+    else:
+        eacf = sum([cf.to_av(i, d) for cf in cashflows]) or NullCashflow()
+        eacf.set_title(title or "Equivalent Annual Cashflow")
+        return eacf
 
 def bcr(cashflows) -> float:
     nf = get_last_period(cashflows)
