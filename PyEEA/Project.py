@@ -7,7 +7,7 @@ from .cashflow import DynamicSeriesFactory as ds
 
 from .taxation import TaxationHelper as th, DepreciationHelper as dh
 
-from .valuation import npw, nfw, bcr, irr, mirr
+from .valuation import npw, nfw, eacf, bcr, irr, mirr
 
 from .utilities import parse_d, parse_ns
 
@@ -289,7 +289,7 @@ class Project:
                 "Did you mean to use set_interest(i)?"
             )
         cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
-        return npw(cashflow, i)
+        return npw(cashflows, i)
 
     def nfw(self, n, i=None, after_tax=True):
         i = i if i is not None else self.get_interest()
@@ -310,7 +310,7 @@ class Project:
             )
         d = d if d is not None else self._periods
         cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
-        return eacf_cashflow(cashflows, i, d)
+        return eacf(cashflows, i, d)
 
 
     def bcr(self, after_tax=True):
@@ -319,7 +319,7 @@ class Project:
 
     def irr(self, i0=None, after_tax=True):
         i0 = i0 if i0 is not None else self.get_interest()
-        if i is None:
+        if i0 is None:
             raise ValueError(
                 "No initial interest guess provided for irr calculations."
                 "Did you mean to use set_interest(i)?"
