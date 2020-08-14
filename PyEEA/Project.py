@@ -35,9 +35,9 @@ class Project:
         self._title = str(title)
         self._interest = float(interest)
 
-        self._cashflows = []
-        self._depreciations = []
-        self._taxes = []
+        self._cashflows = list()
+        self._depreciations = list()
+        self._taxes = list()
         
 
     def __str__(self):
