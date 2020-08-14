@@ -88,13 +88,19 @@ class Gradient(Annuity):
         return cfs[0] if len(cfs) == 1 else cfs
 
     def to_pv(self, i):
-        pv1 = (
-            self.amount * ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D)
-        )  # Annuity Term
-        pv2 = (
-            self.G * ((1 + i) ** self.D - i * self.D - 1) / (i ** 2 * (1 + i) ** self.D)
-        )  # Gradient Term
-        pv = pv1 + pv2
+        # Annual Present Worth Factor
+        apwf = (
+            self.D 
+            if i == 0 
+            else ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D))
+
+        # Gradient Present Worth Factor
+        gpwf = (
+            (self.D**2 - self.D) / 2
+            if i == 0
+            else ((1 + i) ** self.D - i * self.D - 1) / (i ** 2 * (1 + i) ** self.D))
+        
+        pv = self.amount * apwf + self.G * gpwf
         if self.d[0] == 0:  # Requested gradient is equivalet to this instance
             return sp.Present(pv, self.title, self.tags)
         else:  # The gradient starts at n > 0, so we need to convert a "future present value" to a present value
