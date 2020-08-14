@@ -1,5 +1,3 @@
-from scipy.optimize import fsolve
-
 from .cashflow import Cashflow, NullCashflow
 from .cashflow import SinglePaymentFactory as sp
 from .cashflow import UniformSeriesFactory as us
@@ -7,9 +5,11 @@ from .cashflow import DynamicSeriesFactory as ds
 
 from .taxation import TaxationHelper as th, DepreciationHelper as dh
 
-from .valuation import npw, nfw, eacf, bcr, irr, mirr
+from .valuation import npw, nfw, eacf, epcf, bcr, irr, mirr
 
-from .utilities import parse_d, parse_ns
+from .utilities import parse_d, parse_ns, get_final_period
+
+from math import isinf
 
 from matplotlib.cm import get_cmap
 name = "tab20"
@@ -39,7 +39,6 @@ class Project:
         self._depreciations = []
         self._taxes = []
         
-        self._periods = 0
 
     def __str__(self):
         return self.to_dataframe().to_string()
@@ -57,7 +56,7 @@ class Project:
                 ns = val  # Get the cashflows of multiple periods as a 2D array
             elif type(val) == slice:
                 start = val.start or 0
-                stop = (val.stop or self._periods) + 1
+                stop = (val.stop or self.get_final_period(finite=True)) + 1
                 step = val.step or 1
                 ns = range(start, stop, step)
 
@@ -136,6 +135,10 @@ class Project:
     def get_interest(self):
         return self._interest
 
+    def get_final_period(self, finite=False): 
+        nf = get_final_period(self.get_cashflows(), finite=finite)
+        return nf
+
     def add_cashflow(self, cashflow):
         """
         Author: Thomas Richmond
@@ -149,21 +152,6 @@ class Project:
 
         self._cashflows.append(cashflow)
 
-        def final_period(cf):
-            if isinstance(cf, sp.Future):  # Also accounts for Present
-                return cf.n
-            elif isinstance(cf, us.Annuity):
-                return cf.d[1]
-            elif isinstance(cf, ds.Dynamic):
-                return cf.d[1]
-            else:
-                return 0
-
-        # Update our periods if needed
-        nf = final_period(cashflow)
-        if nf > self._periods:
-            self._periods = nf
-
         return self  # Daisy Chaining!
 
     def add_depreciation(self, depreciation):
@@ -173,9 +161,6 @@ class Project:
         self._depreciations.append(depreciation)
         self.add_cashflows(depreciation.cashflows)
 
-        if depreciation.d[1] > self._periods:
-            self._periods = depreciation.d[1]
-        
         return self 
 
     def add_cashflows(self, cashflows):
@@ -252,7 +237,7 @@ class Project:
     def to_dataframe(self, n=None):
         import pandas as pd
 
-        periods = list(range((n or self._periods) + 1))
+        periods = list(range((n or self.get_final_period(finite=True) or 5) + 1))
         titles = [cf.get_title() for cf in self.get_taxed_cashflows()]
         cashflows = [[str(cf[n]).split('(')[0] for cf in self.get_taxed_cashflows()] for n in periods]
         
@@ -262,7 +247,7 @@ class Project:
         import pandas as pd
         from matplotlib import pyplot as plt
 
-        periods = list(range((n or self._periods) + 1))
+        periods = list(range((n or self.get_final_period(finite=True) or 5) + 1))
         titles = [cf.get_title() for cf in self.get_taxed_cashflows()]
         cashflows = [[cf[n].amount for cf in self.get_taxed_cashflows()] for n in periods]
 
@@ -302,13 +287,17 @@ class Project:
         return nfw(cashflows, i, n)
 
     def eacf(self, d=None, i=None, after_tax=True):
+        d = parse_d(d if d is not None else self.get_final_period())
+        
+        if isinf(d[1]):
+            return self.epcf(d[0], i, after_tax)
+        
         i = i if i is not None else self.get_interest()
         if i is None:
             raise ValueError(
                 "No interest provided for eacf calculations."
                 "Did you mean to use set_interest(i)?"
             )
-        d = d if d is not None else self._periods
         cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
         return eacf(cashflows, i, d)
 
@@ -319,7 +308,6 @@ class Project:
                 "No interest provided for eacf calculations."
                 "Did you mean to use set_interest(i)?"
             )
-        
         cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
         return epcf(cashflows, i, d0)
 
