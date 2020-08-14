@@ -58,6 +58,10 @@ class Cashflow(ABC):
         else:
             return self.__add__(other)
 
+    def __rsub__(self, other):
+        return self.__sub__(other)
+
+
     def __getitem__(self, val):
         """
         Implemented so we can get the cashflow that occurs at period n as follows:
@@ -135,6 +139,12 @@ class NullCashflow(Cashflow):
     def __add__(self, other):
         return other
 
+    def __sub__(self, other):
+        return other
+
+    def __mul__(self, other):
+        return self
+
     def __lt__(self, them):
         them = float(them)
         return self.amount < them
@@ -148,7 +158,6 @@ class NullCashflow(Cashflow):
 
     def __ge__(self, them):
         return not self.__lt__(them)
-
 
     def to_shorthand(self):
         return super().to_shorthand(("N",))
