@@ -1,6 +1,6 @@
 from ..cashflow import NullCashflow, Present, Future, Annuity, Perpetuity
-from ..utilities import parse_d, get_last_period
-from typing import Union
+from ..utilities import get_final_period
+from math import isinf
 
 def npw(cashflows, i, title=None) -> Present:
     npw = sum([cf.to_pv(i) for cf in cashflows]) or NullCashflow()
@@ -13,45 +13,52 @@ def nfw(cashflows, i, n, title=None) -> Future:
     return nfw
 
 def eacf(cashflows, i, d, title=None) -> Annuity:
-    d = parse_d(d)
     eacf = sum([cf.to_av(i, d) for cf in cashflows]) or NullCashflow()
     eacf.set_title(title or "Equivalent Annual Cashflow")
     return eacf
 
 def epcf(cashflows, i, d0, title=None) -> Perpetuity:
-    pv = sum([cf.to_pv(i).amount for cf in cashflows])
+    pv = sum([cf.to_pv(i) for cf in cashflows])
     epcf = Perpetuity(pv.amount * i, d0)
     epcf.set_title(title or "Equivalent Perpetual Cashflow")
     return epcf
 
-def bcr(cashflows) -> float:
-    nf = get_last_period(cashflows)
-    net_cashflows = [sum([cf[n] for cf in cashflows]) for n in range(nf+1)]
-    rvnus = sum([ncf.to_pv(0) for ncf in net_cashflows if ncf > 0])
-    costs = sum([ncf.to_pv(0) for ncf in net_cashflows if ncf < 0])
+def bcr(cashflows, i=0) -> float:
+    pvs = [cf.to_pv(0) for cf in cashflows]
+    rvnus = sum([pv for pv in pvs if pv > 0])
+    costs = sum([pv for pv in pvs if pv < 0])
     if all([rvnus, costs]):
         return -(rvnus.amount / costs.amount)
     else:
         return None
 
-def irr(cashflows, i0=0) -> float:
-    from scipy.optimize import fsolve
-    
-    # IRR only exists if BCR exists
-    if not bcr(cashflows):
+def irr(cashflows, i0=0) -> float: 
+    # IRR only exists if we have both net positive AND net negative cashflows over all periods.
+    # Note that we need to check longer than the final period in case of perpetuities.
+    nf = get_final_period(cashflows, finite=True)
+    net_cashflows = [
+        sum([cf[n] for cf in cashflows])
+        for n in range(nf + 2)]
+
+    if not all([
+        any([ncf > 0 for ncf in net_cashflows]),
+        any([ncf < 0 for ncf in net_cashflows])
+    ]):
         return None
 
+    # Compute IRR by solving where npw is zero
+    from scipy.optimize import fsolve
     def irr_fun(i):
         return npw(cashflows, i[0]).amount
     irrs, _, success, _ = fsolve(irr_fun, i0, factor=0.1, full_output=True)
     
-    if success:
-        return irrs[0]
-    else:
-        return None
+    return irrs[0] if success else None
 
 def mirr(cashflows, e_inv, e_fin, i0=0) -> float:
-    nf = get_last_period(cashflows)
+    nf = get_final_period(cashflows)
+    if isinf(nf):
+        return None
+
     net_cashflows = [sum([cf[n] for cf in cashflows]) for n in range(nf+1)]
     fv_rvnu = sum([ncf.to_fv(e_fin, nf) for ncf in net_cashflows if ncf > 0])
     pv_cost = sum([ncf.to_pv(e_inv)     for ncf in net_cashflows if ncf < 0])
