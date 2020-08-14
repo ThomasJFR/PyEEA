@@ -180,23 +180,6 @@ class Project:
     def get_taxed_cashflows(self):
         return self.get_cashflows() + self.get_taxflows()
 
-    def revenues(self):
-        revenues = []
-        for cf in self.get_cashflows():
-            if isinstance(cf, Cashflow):
-                if cf.amount > 0:
-                    revenues.append(cf)
-        return revenues
-
-    def costs(self):
-        costs = []
-        for cf in self.get_cashflows():
-            if isinstance(cf, Cashflow):
-                if cf.amount < 0:
-                    costs.append(cf)
-        return costs
-
-
     def to_dataframe(self, n=None):
         import pandas as pd
 
