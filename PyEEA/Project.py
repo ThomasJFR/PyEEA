@@ -74,45 +74,6 @@ class Project:
             cashflows = [[cf[n] for cf in get_cashflows_for_period(n)] for n in ns]
             return cashflows[0] if len(cashflows) == 1 else cashflows
 
-    def __add__(self, other):
-        agg = Project()
-        for cf1 in self.cashflows:
-            agg.add_cashflow(cf1)
-        for cf2 in other.cashflows:
-            agg.add_cashflow(cf2)
-
-        return agg  # The aggregation of Projects
-
-    def __radd__(self, other):
-        if other == 0:  # Happens when sum() begins
-            return self
-        else:
-            return self.__add__(other)
-
-    def __lt__(self, them):
-        if type(them) == int or type(them) == float:
-            return self.npw() < them
-        else:
-            return self.npw() < them.npw()
-
-    def __le__(self, them):
-        if type(them) == int or type(them) == float:
-            return self.npw() <= them
-        else:
-            return self.npw() <= them.npw()
-
-    def __gt__(self, them):
-        if type(them) == int or type(them) == float:
-            return self.npw() > them
-        else:
-            return self.npw() > them.npw()
-
-    def __ge__(self, them):
-        if type(them) == int or type(them) == float:
-            return self.npw() >= them
-        else:
-            return self.npw() >= them.npw()
-
     def __enter__(self):
         from copy import deepcopy
 
