@@ -173,7 +173,9 @@ class Project:
         return self._taxes 
 
     def get_taxflows(self):
-        return [tax.generate_cashflow(self) for tax in self.get_taxes()]
+        return [
+            tax.generate_cashflow(self.get_cashflows(), self.get_depreciations()) 
+            for tax in self.get_taxes()]
 
     def get_taxed_cashflows(self):
         return self.get_cashflows() + self.get_taxflows()
