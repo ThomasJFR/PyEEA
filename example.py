@@ -16,4 +16,6 @@ lumber.add_cashflows([
 lumber.to_cashflowdiagram()
 lumber.add_tax(th.Tax("CCA", 0.40))
 print(lumber.to_dataframe())
-
+print(lumber.npw())
+print(lumber.eacf())
+print(lumber.irr())

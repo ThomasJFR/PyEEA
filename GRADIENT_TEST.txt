@@ -1,0 +1,16 @@
+#A = Annuity(1000, 5)
+#print([str(a) for a in A[:5]])
+#print(A.to_pv(0)) # == 5000(P)
+
+""" No Interest """
+G1 = Gradient(1000, 0, 5)
+print([str(g) for g in G1[:5]])
+print(G1.to_pv(0)) # == 5000(P)
+
+G2 = Gradient(0, 100, 5)
+print([str(g) for g in G2[:5]])
+print(G2.to_pv(0)) # == 1000(P)
+
+G3 = Gradient(-100, 100, 5)
+print([str(g) for g in G3[:5]])
+print(G3.to_pv(0)) # == 500(P)
