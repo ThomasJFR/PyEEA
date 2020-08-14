@@ -1,4 +1,6 @@
-
+from math import inf, isinf
+from typing import Iterable
+    
 def parse_d(d):
     """
     Author: Thomas Richmond
@@ -16,26 +18,38 @@ def parse_d(d):
                          the end period of an annuity starting at period one.
     Returns: A two-element list of the start and end periods of the annuity.
     """
-    isint = lambda x: any([type(x) is int, type(x) is float and x // 1 == x])
-
-    if type(d) is list:
-        if len(d) == 1 and isint(d[0]):
-            return [0, int(d[0])]
-        elif len(d) == 2 and isint(d[0]) and isint(d[1]):
-            return [int(d[0]), int(d[1])]
+    
+    if isinstance(d, Iterable):
+        if len(d) > 2:
+            return TypeError("Length of Iterable d must not exceed 2")
+        if len(d) == 1:
+            d = [0, d[0]]
+        
+        # Validate d0
+        if int(d[0]) == d[0]:
+            pass
         else:
-            raise ValueError(
-                "Argument n in list form must contain whole numbers,"
-                + "and its length must not exceed 2"
-            )
-    elif isint(d):
-        return [0, int(d)]
-    else:
-        raise TypeError(
-            "Type of argument n <%s> is not supported;" % type(d)
-            + "must be whole number or list of whole numbers"
-        )
+            return TypeError("Type of d0 must be an integer!")
 
+        # Validate d1
+        if isinf(d[1]):
+            pass
+        elif int(d[1]) == d[1]:
+            pass
+        else:
+            return TypeError("Type of d1 must be an integer or infinite!")
+
+        if d[1] >= d[0]:
+            pass
+        else:
+            return ValueError("Value of d0 must not exceed d1!")
+        return d
+    elif isinf(d):
+        return parse_d([0, d])
+    elif int(d) == d:
+        return parse_d([0, d])
+    else:
+        raise TypeError("Type of d must be an integer or infinite, or list thereof")
 
 def parse_ns(val):
     if type(val) == int:
@@ -50,24 +64,30 @@ def parse_ns(val):
 
     return ns
 
-def get_last_period(cashflows, ignore_perpetuities=True):
+def get_final_period(cashflows, finite=True):
     from .cashflow import Present, Future, Annuity, Perpetuity, Dynamic
     from .taxation import Depreciation
+    
+    if not isinstance(cashflows, Iterable):
+        cashflows = [cashflows]
+
     def final_period(cf):
         if isinstance(cf, Future):  # also accounts for present
             return cf.n
         elif isinstance(cf, Annuity):
             return cf.d[1]
         elif isinstance(cf, Perpetuity):
-            return 0 if ignore_perpetuities else float('inf')
+            return cf.d0 if finite else inf
         elif isinstance(cf, Dynamic):
             return cf.d[1]
         elif isinstance(cf, Depreciation):
             return cf.d[1]
         else:
             return 0
-    max_n = 0
+
+    final_n = 0
     for cashflow in cashflows:
         n = final_period(cashflow)
-        max_n = n if n > max_n else max_n
-    return max_n
+        final_n = n if n > final_n else final_n
+    return final_n
+
