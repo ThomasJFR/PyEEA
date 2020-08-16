@@ -1,6 +1,7 @@
 from numpy.random import standard_normal
 from numbers import Number
 
+
 def simulation_analysis(project, sim_dict, iterations=250, valuator=None):
     """
     Purpose:
@@ -11,15 +12,17 @@ def simulation_analysis(project, sim_dict, iterations=250, valuator=None):
                     is either a number defining the standard deviation for the cashflow as a percentage, or a 
                     function defining some way to modify the cashflow by an amount
     """
-    
+
     # Make every sim_fun value a callable, converting numbers to stdev functions
     for key in sim_dict:
         if isinstance(sim_dict[key], Number):
             stdev = sim_dict[key]
+
             def std_dist(amt):
                 return amt * stdev * standard_normal()
+
             sim_dict[key] = std_dist
-    
+
     valuator = valuator or project.npw
     if not callable(valuator):
         return TypeError("Valuator must be a callable construct!")
@@ -37,4 +40,3 @@ def simulation_analysis(project, sim_dict, iterations=250, valuator=None):
             valuations.append(valuator())
 
     return valuations
-

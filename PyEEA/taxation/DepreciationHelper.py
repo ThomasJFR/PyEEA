@@ -6,10 +6,11 @@ from ..cashflow.SinglePaymentFactory import Present, Future
 
 from ..utilities import parse_d, parse_ns
 
+
 class Depreciation(ABC):
 
     depreciation_id = 1  # Iterating counter used whenever a title isn't given
-    
+
     def __init__(self, cashflows, d, salvage=0, title=None, tags=None):
         """
         Author: Thomas Richmond
@@ -46,9 +47,9 @@ class Depreciation(ABC):
         elif type(tags) is str:
             tags = [tags]
         self.tags = [self.title, *tags]
-        
+
         Depreciation.depreciation_id += 1
- 
+
     def __getitem__(self, val):
         """
         Implemented so we can get the cashflow that occurs at period n as follows:
@@ -73,11 +74,10 @@ class Depreciation(ABC):
         Parameters: ns [tuple(int)] - The periods to get the value of depreciation at.
         """
         pass
-    
+
     @classmethod
     def get_depreciation_name(cls):
         return cls.__name__
-
 
 
 class StraightLine(Depreciation):
@@ -99,6 +99,7 @@ class StraightLine(Depreciation):
 
         return dps[0] if len(dps) == 1 else dps
 
+
 class SumOfYearsDigits(Depreciation):
     def __init_(self, cashflows, d, salvage=0, title=None, tags=None):
         super().__init__(cashflows, d, salvage, title, tags)
@@ -117,8 +118,11 @@ class SumOfYearsDigits(Depreciation):
 
         return dps[0] if len(dps) == 1 else dps
 
+
 class DecliningBalance(Depreciation):
-    def __init__(self, cashflows, rate, d, salvage=0, first_claim=1.00, title=None, tags=None):
+    def __init__(
+        self, cashflows, rate, d, salvage=0, first_claim=1.00, title=None, tags=None
+    ):
         super().__init__(cashflows, d, salvage, title, tags)
         self.rate = rate
         self._first_claim = first_claim
@@ -129,12 +133,12 @@ class DecliningBalance(Depreciation):
             if self.d[0] < n <= self.d[1]:
                 year = n - self.d[0]
                 balance = self.base + self.salvage
-                
+
                 # Purchase
                 expense = balance * self.rate * self._first_claim
-                
+
                 # Depreciations
-                for y in range(year-1):
+                for y in range(year - 1):
                     balance -= expense
                     expense = balance * self.rate
 
@@ -147,4 +151,3 @@ class DecliningBalance(Depreciation):
                 dps.append(NullCashflow())
 
         return dps[0] if len(dps) == 1 else dps
-

@@ -12,9 +12,11 @@ from .utilities import parse_d, parse_ns, get_final_period
 from math import isinf
 
 from matplotlib.cm import get_cmap
+
 name = "tab20"
 cmap = get_cmap(name)  # type: matplotlib.colors.ListedColormap
 tab20 = cmap.colors  # type: list
+
 
 class Project:
     """
@@ -38,7 +40,6 @@ class Project:
         self._cashflows = list()
         self._depreciations = list()
         self._taxes = list()
-        
 
     def __str__(self):
         return self.to_dataframe().to_string()
@@ -49,7 +50,7 @@ class Project:
             matches = [cf for cf in self.get_cashflows() if val in cf.tags]
             return matches
         # OPTION 2: Index by periods
-        else: 
+        else:
             if type(val) == int:
                 ns = (val,)  # Get the cashflows in a period as an array
             elif type(val) == tuple:
@@ -63,14 +64,17 @@ class Project:
             # TODO ADD SUPPORT FOR TAXATION
             def get_cashflows_for_period(n):
                 def do_include_cashflow(cf):
-                    return any([
-                        isinstance(cf, sp.Future) and n == cf.n,
-                        isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
-                        isinstance(cf, us.Perpetuity) and n > cf.d0,
-                        isinstance(cf, ds.Dynamic) and cf.d[0] < n <= cf.d[1],
-                    ])
+                    return any(
+                        [
+                            isinstance(cf, sp.Future) and n == cf.n,
+                            isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
+                            isinstance(cf, us.Perpetuity) and n > cf.d0,
+                            isinstance(cf, ds.Dynamic) and cf.d[0] < n <= cf.d[1],
+                        ]
+                    )
+
                 return [cf for cf in self.get_cashflows() if do_include_cashflow(cf)]
-            
+
             cashflows = [[cf[n] for cf in get_cashflows_for_period(n)] for n in ns]
             return cashflows[0] if len(cashflows) == 1 else cashflows
 
@@ -88,7 +92,9 @@ class Project:
         self._title = title
 
     def get_title(self):
-        return self._title or "Project with {} cashflows".format(len(self.get_cashflows()))
+        return self._title or "Project with {} cashflows".format(
+            len(self.get_cashflows())
+        )
 
     def set_interest(self, interest):
         self._interest = interest
@@ -96,7 +102,7 @@ class Project:
     def get_interest(self):
         return self._interest
 
-    def get_final_period(self, finite=False): 
+    def get_final_period(self, finite=False):
         nf = get_final_period(self.get_cashflows(), finite=finite)
         return nf
 
@@ -118,11 +124,11 @@ class Project:
     def add_depreciation(self, depreciation):
         if not isinstance(depreciation, dh.Depreciation):
             raise TypeError("Argument must be a child of Depreciation")
-        
+
         self._depreciations.append(depreciation)
         self.add_cashflows(depreciation.cashflows)
 
-        return self 
+        return self
 
     def add_cashflows(self, cashflows):
         """
@@ -159,7 +165,7 @@ class Project:
         """
         if not isinstance(tax, th.Tax):
             raise TypeError("Argument must be a Tax instance!")
-        
+
         self._taxes.append(tax)
 
         return self
@@ -170,12 +176,13 @@ class Project:
         return self
 
     def get_taxes(self):
-        return self._taxes 
+        return self._taxes
 
     def get_taxflows(self):
         return [
-            tax.generate_cashflow(self.get_cashflows(), self.get_depreciations()) 
-            for tax in self.get_taxes()]
+            tax.generate_cashflow(self.get_cashflows(), self.get_depreciations())
+            for tax in self.get_taxes()
+        ]
 
     def get_taxed_cashflows(self):
         return self.get_cashflows() + self.get_taxflows()
@@ -185,8 +192,11 @@ class Project:
 
         periods = list(range((n or self.get_final_period(finite=True) or 5) + 1))
         titles = [cf.get_title() for cf in self.get_taxed_cashflows()]
-        cashflows = [[str(cf[n]).split('(')[0] for cf in self.get_taxed_cashflows()] for n in periods]
-        
+        cashflows = [
+            [str(cf[n]).split("(")[0] for cf in self.get_taxed_cashflows()]
+            for n in periods
+        ]
+
         return pd.DataFrame(cashflows, index=periods, columns=titles)
 
     def to_cashflowdiagram(self, n=None, size=None):
@@ -195,7 +205,9 @@ class Project:
 
         periods = list(range((n or self.get_final_period(finite=True) or 5) + 1))
         titles = [cf.get_title() for cf in self.get_taxed_cashflows()]
-        cashflows = [[cf[n].amount for cf in self.get_taxed_cashflows()] for n in periods]
+        cashflows = [
+            [cf[n].amount for cf in self.get_taxed_cashflows()] for n in periods
+        ]
 
         plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
         ax = plotdata.plot(kind="bar", stacked="true", color=tab20)
@@ -234,10 +246,10 @@ class Project:
 
     def eacf(self, d=None, i=None, after_tax=True):
         d = parse_d(d if d is not None else self.get_final_period())
-        
+
         if isinf(d[1]):
             return self.epcf(d[0], i, after_tax)
-        
+
         i = i if i is not None else self.get_interest()
         if i is None:
             raise ValueError(
@@ -277,4 +289,3 @@ class Project:
         e_fin = e_fin if e_fin is not None else self.get_interest()
         cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
         return mirr(cashflows, e_inv, e_fin)
-

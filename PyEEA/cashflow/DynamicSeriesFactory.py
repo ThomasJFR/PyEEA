@@ -1,6 +1,7 @@
 from . import Cashflow
 from ..utilities import parse_d, parse_ns
 
+
 class Dynamic(Cashflow):
     def __init__(self, amount_fun, d, title=None, tags=None):
         super().__init__(0, title, tags)
@@ -11,7 +12,7 @@ class Dynamic(Cashflow):
     def to_shorthand(self):
         # TODO New implementaton needed
         return "Dynamic Series"
-    
+
     def cashflow_at(self, ns):
         ns = parse_ns(ns)
         cashflows = []

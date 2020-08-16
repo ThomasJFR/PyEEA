@@ -1,6 +1,7 @@
 from math import inf, isinf
 from typing import Iterable
-    
+
+
 def parse_d(d):
     """
     Author: Thomas Richmond
@@ -18,13 +19,13 @@ def parse_d(d):
                          the end period of an annuity starting at period one.
     Returns: A two-element list of the start and end periods of the annuity.
     """
-    
+
     if isinstance(d, Iterable):
         if len(d) > 2:
             return TypeError("Length of Iterable d must not exceed 2")
         if len(d) == 1:
             d = [0, d[0]]
-        
+
         # Validate d0
         if int(d[0]) == d[0]:
             pass
@@ -51,6 +52,7 @@ def parse_d(d):
     else:
         raise TypeError("Type of d must be an integer or infinite, or list thereof")
 
+
 def parse_ns(val):
     if type(val) == int:
         ns = (val,)  # Get the cashflows in a period as an array
@@ -64,10 +66,11 @@ def parse_ns(val):
 
     return ns
 
+
 def get_final_period(cashflows, finite=True):
     from .cashflow import Present, Future, Annuity, Perpetuity, Dynamic
     from .taxation import Depreciation
-    
+
     if not isinstance(cashflows, Iterable):
         cashflows = [cashflows]
 
@@ -90,4 +93,3 @@ def get_final_period(cashflows, finite=True):
         n = final_period(cashflow)
         final_n = n if n > final_n else final_n
     return final_n
-

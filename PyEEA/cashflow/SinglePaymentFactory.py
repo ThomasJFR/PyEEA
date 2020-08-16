@@ -3,6 +3,7 @@ from .UniformSeriesFactory import Annuity
 from ..utilities import parse_d
 from numbers import Number
 
+
 class Future(Cashflow):
     """
     Author: Thomas Richmond
@@ -21,7 +22,11 @@ class Future(Cashflow):
             return NotImplemented
         if self.n == other.n:
             val = self.amount + other.amount
-            return Future(val, self.n, self.title, self.tags) if self.n > 0 else Present(val, self.title, self.tags)
+            return (
+                Future(val, self.n, self.title, self.tags)
+                if self.n > 0
+                else Present(val, self.title, self.tags)
+            )
         else:
             raise ArithmeticError(
                 "Cannot add two Single cashflows occurring at different periods!"
@@ -32,13 +37,15 @@ class Future(Cashflow):
             return NotImplemented
         if self.n == other.n:
             val = self.amount - other.amount
-            return Future(val, self.n, self.title, self.tags) if self.n > 0 else Present(val, self.title, self.tags)
+            return (
+                Future(val, self.n, self.title, self.tags)
+                if self.n > 0
+                else Present(val, self.title, self.tags)
+            )
         else:
             raise ArithmeticError(
                 "Cannot add two Single cashflows occurring at different periods!"
             )
-
-
 
     def __mul__(self, other):
         if isinstance(other, Number):
@@ -49,7 +56,7 @@ class Future(Cashflow):
             them = them.amount
         else:
             them = float(them)
-        
+
         return self.amount < them
 
     def __le__(self, them):
@@ -57,7 +64,7 @@ class Future(Cashflow):
             them = them.amount
         else:
             them = float(them)
-            
+
         return self.amount <= them
 
     def __gt__(self, them):

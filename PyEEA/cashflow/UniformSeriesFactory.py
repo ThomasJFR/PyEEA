@@ -14,7 +14,7 @@ class Annuity(Cashflow):
             return NotImplemented
         if self.d == other.d:
             val = self.amount + other.amount
-            return Annuity(val, self.d, self.title, self.tags) 
+            return Annuity(val, self.d, self.title, self.tags)
         else:
             return ValueError("Added annuities must have equal durations")
 
@@ -89,17 +89,15 @@ class Gradient(Annuity):
 
     def to_pv(self, i):
         # Annual Present Worth Factor
-        apwf = (
-            self.D 
-            if i == 0 
-            else ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D))
+        apwf = self.D if i == 0 else ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D)
 
         # Gradient Present Worth Factor
         gpwf = (
-            (self.D**2 - self.D) / 2
+            (self.D ** 2 - self.D) / 2
             if i == 0
-            else ((1 + i) ** self.D - i * self.D - 1) / (i ** 2 * (1 + i) ** self.D))
-        
+            else ((1 + i) ** self.D - i * self.D - 1) / (i ** 2 * (1 + i) ** self.D)
+        )
+
         pv = self.amount * apwf + self.G * gpwf
         if self.d[0] == 0:  # Requested gradient is equivalet to this instance
             return sp.Present(pv, self.title, self.tags)
@@ -112,7 +110,7 @@ class Gradient(Annuity):
     def to_av(self, i, d):
         d = parse_d(d)
         D = d[1] - d[0]
-    
+
         if d == self.d and d[0] == 0:  # Use standard formula
             A_eq = self.amount + self.G * (1 / i - D / ((1 + i) ** (D - d[0]) - 1))
             return Annuity(A_eq, d, self.title, self.tags)
@@ -157,8 +155,8 @@ class Geometric(Annuity):
                 return sp.Present(xv, self.title, self.tags)
             else:
                 return sp.Future(xv, self.d[0], self.title, self.tags).to_pv(i)
-        #else:
-         #   raise ValueError("Geometric rate (g) cannot exceed interest rate (i)!")
+        # else:
+        #   raise ValueError("Geometric rate (g) cannot exceed interest rate (i)!")
 
     def to_fv(self, i, n):
         """if i == self.g:
@@ -184,13 +182,13 @@ class Perpetuity(Cashflow):
         if type(d0) is not int:
             raise TypeError("Parameter d0 must be an integer!")
         self.d0 = d0
-    
+
     def __add__(self, other):
         if not all([type(self) == Perpetuity, type(other) == Perpetuity]):
             return NotImplemented
         if self.d0 == other.d0:
             val = self.amount + other.amount
-            return Perpetuity(val, self.d0, self.title, self.tags) 
+            return Perpetuity(val, self.d0, self.title, self.tags)
         else:
             return ValueError("Added annuities must have equal durations")
 

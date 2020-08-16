@@ -27,13 +27,16 @@ class Cashflow(ABC):
                               information on the context of the cashflow.
                               Titles are included as a tag by default.
     """
+
     CURRENCY_FMT_STR = "${:,.2f}"
     cashflow_id = 1  # Iterating counter used whenever a title isn't given
 
     def __init__(self, amount, title=None, tags=None):
         self.amount = float(amount)
-        self.title = str(title) if title is not None else (
-            "%s %i " % (self.get_cashflow_name(), Cashflow.cashflow_id)
+        self.title = (
+            str(title)
+            if title is not None
+            else ("%s %i " % (self.get_cashflow_name(), Cashflow.cashflow_id))
         )
         if not tags:  # If falsey, just give an empty list
             tags = []
@@ -61,7 +64,6 @@ class Cashflow(ABC):
     def __rsub__(self, other):
         return self.__sub__(other)
 
-
     def __getitem__(self, val):
         """
         Implemented so we can get the cashflow that occurs at period n as follows:
@@ -77,7 +79,7 @@ class Cashflow(ABC):
 
     def get_title(self):
         return self.title
-    
+
     def add_tag(self, tag):
         self.tags.append(tag)
 
@@ -89,7 +91,7 @@ class Cashflow(ABC):
         # Step 1: Add the cash amount
         # EXAMPLE: -$12,229,999.99
         valstr = Cashflow.CURRENCY_FMT_STR.format(self.amount)
-        valstr = valstr.replace('$-','-$')
+        valstr = valstr.replace("$-", "-$")
         # Step 2: Add notated information
         # EXAMPLE: (G, [2,5], 210)
         info = (
@@ -150,7 +152,7 @@ class NullCashflow(Cashflow):
         return self.amount < them
 
     def __le__(self, them):
-        them = float(them)    
+        them = float(them)
         return self.amount <= them
 
     def __gt__(self, them):

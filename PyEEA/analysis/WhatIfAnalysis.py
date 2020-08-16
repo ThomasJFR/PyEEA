@@ -3,6 +3,7 @@ from collections.abc import Iterable
 
 from ..valuators import npw, nfw, eacf, bcr, irr, mirr
 
+
 class WhatIfAnalysis:
     def __init__(self, project):
         self._project = deepcopy(project)
@@ -25,7 +26,6 @@ class WhatIfAnalysis:
 class SensitivityAnalysis(WhatIfAnalysis):
     pass
 
+
 class SimulationAnalysis(WhatIfAnalysis):
     pass
-
-
