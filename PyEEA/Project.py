@@ -200,7 +200,7 @@ class Project:
         plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
         ax = plotdata.plot(kind="bar", stacked="true", color=tab20)
         ax.set_title(self.get_title())
-        ax.set_ylabel("USD")
+        ax.set_ylabel("Cashflow")
         ax.set_xlabel("Period")
         ax.axhline()
 
