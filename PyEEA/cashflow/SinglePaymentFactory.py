@@ -91,7 +91,7 @@ class Future(Cashflow):
         if self.n == n:
             return self
         else:
-            return self.to_pv(i).to_fv(i, n, self.title, self.tags)
+            return self.to_pv(i).to_fv(i, n)
 
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = parse_d(d)
