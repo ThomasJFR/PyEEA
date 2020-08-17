@@ -96,9 +96,9 @@ class Future(Cashflow):
     def to_av(self, i, d, scheme=ps.ARREAR):
         d = parse_d(d)
         D = d[1] - d[0]
-
-        sinking_fund_factor = i / ((1 + i) ** D - 1)
-        if d[0] == 0:
+            
+        if d == [0, self.n]:
+            sinking_fund_factor = i / ((1 + i) ** D - 1)
             av = self.amount * sinking_fund_factor
             return Annuity(av, d, self.title, self.tags)
         else:
