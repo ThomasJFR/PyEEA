@@ -308,7 +308,7 @@ class Project:
 
     def mirr(self, e_inv=None, e_fin=None, after_tax=True, tags=None):
         e_inv = e_inv if e_inv is not None else self.get_interest()
-        e_fin = e_fin if e_fin is not None else self.get_interest()
+        e_fin = e_fin if e_fin is not None else e_inv
         cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return mirr(cashflows, e_inv, e_fin)
 
