@@ -47,7 +47,7 @@ class Project:
     def __getitem__(self, val):
         # OPTION 1: Index by tags
         if type(val) is str:
-            matches = [cf for cf in self.get_cashflows() if val in cf.tags]
+            matches = self.get_cashflows(tags=val)
             return matches
         # OPTION 2: Index by periods
         else:
@@ -148,11 +148,22 @@ class Project:
 
         return self
 
-    def get_cashflows(self):
-        return self._cashflows
+    def get_cashflows(self, tags=None):
+        if not tags:
+            return self._cashflows
+        
+        if type(tags) is str:
+            tags = [tags]
+        return [cashflow for cashflow in self._cashflows for tag in tags if tag in cashflow.tags]
 
-    def get_depreciations(self):
-        return self._depreciations
+    def get_depreciations(self, tags=None):
+        if not tags:
+            return self._depreciations
+
+        
+        if type(tags) is str:
+            tags = [tags]
+        return [depreciation for depreciation in self._depreciations for tag in tags if tag in depreciation.tags]
 
     def add_tax(self, tax):
         """
@@ -178,14 +189,14 @@ class Project:
     def get_taxes(self):
         return self._taxes
 
-    def get_taxflows(self):
+    def get_taxflows(self, tags=None):
         return [
-            tax.generate_cashflow(self.get_cashflows(), self.get_depreciations())
+            tax.generate_cashflow(self.get_cashflows(tags=tags), self.get_depreciations(tags=tags))
             for tax in self.get_taxes()
         ]
 
-    def get_taxed_cashflows(self):
-        return self.get_cashflows() + self.get_taxflows()
+    def get_taxed_cashflows(self, tags=None):
+        return self.get_cashflows(tags=tags) + self.get_taxflows(tags=tags)
 
     def to_dataframe(self, n=None):
         import pandas as pd
@@ -224,31 +235,31 @@ class Project:
     ### PROJECT VALUATION HELPERS
     ###
 
-    def npw(self, i=None, after_tax=True):
+    def npw(self, i=None, after_tax=True, tags=None):
         i = i if i is not None else self.get_interest()
         if i is None:
             raise ValueError(
                 "No interest provided for npw calculations."
                 "Did you mean to use set_interest(i)?"
             )
-        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return npw(cashflows, i)
 
-    def nfw(self, n, i=None, after_tax=True):
+    def nfw(self, n, i=None, after_tax=True, tags=None):
         i = i if i is not None else self.get_interest()
         if i is None:
             raise ValueError(
                 "No interest provided for nfw calculations."
                 "Did you mean to use set_interest(i)?"
             )
-        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return nfw(cashflows, i, n)
 
-    def eacf(self, d=None, i=None, after_tax=True):
+    def eacf(self, d=None, i=None, after_tax=True, tags=None):
         d = parse_d(d if d is not None else self.get_final_period())
 
         if isinf(d[1]):
-            return self.epcf(d[0], i, after_tax)
+            return self.epcf(d[0], i, after_tax, tags=tags)
 
         i = i if i is not None else self.get_interest()
         if i is None:
@@ -256,24 +267,24 @@ class Project:
                 "No interest provided for eacf calculations."
                 "Did you mean to use set_interest(i)?"
             )
-        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return eacf(cashflows, i, d)
 
-    def epcf(self, d0=0, i=None, after_tax=True):
+    def epcf(self, d0=0, i=None, after_tax=True, tags=None):
         i = i if i is not None else self.get_interest()
         if i is None:
             raise ValueError(
                 "No interest provided for eacf calculations."
                 "Did you mean to use set_interest(i)?"
             )
-        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return epcf(cashflows, i, d0)
 
-    def bcr(self, after_tax=True):
-        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+    def bcr(self, after_tax=True, tags=None):
+        cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return bcr(cashflows)
 
-    def irr(self, i0=None, after_tax=True):
+    def irr(self, i0=None, after_tax=True, tags=None):
         i0 = i0 if i0 is not None else self.get_interest()
         if i0 is None:
             raise ValueError(
@@ -281,11 +292,11 @@ class Project:
                 "Did you mean to use set_interest(i)?"
             )
 
-        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return irr(cashflows, i0)
 
-    def mirr(self, e_inv=None, e_fin=None, after_tax=True):
+    def mirr(self, e_inv=None, e_fin=None, after_tax=True, tags=None):
         e_inv = e_inv if e_inv is not None else self.get_interest()
         e_fin = e_fin if e_fin is not None else self.get_interest()
-        cashflows = self.get_taxed_cashflows() if after_tax else self.get_cashflows()
+        cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return mirr(cashflows, e_inv, e_fin)
