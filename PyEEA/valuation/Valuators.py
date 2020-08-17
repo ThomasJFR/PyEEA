@@ -63,7 +63,7 @@ def irr(cashflows, i0=0.1) -> float:
     return irrs[0] if success else None
 
 
-def mirr(cashflows, e_inv, e_fin, i0=0.1) -> float:
+def mirr(cashflows, e_inv, e_fin) -> float:
     nf = get_final_period(cashflows)
     if isinf(nf):
         return None
