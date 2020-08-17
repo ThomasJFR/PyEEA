@@ -198,19 +198,26 @@ class Project:
     def get_taxed_cashflows(self, tags=None):
         return self.get_cashflows(tags=tags) + self.get_taxflows(tags=tags)
 
-    def to_dataframe(self, n=None):
+    def to_dataframe(self, to_period=None, net=False):
         import pandas as pd
-
-        periods = list(range((n or self.get_final_period(finite=True) or 5) + 1))
+        to_period = int(to_period or self.get_final_period(finite=True) or 5)
+        periods = list(range(to_period + 1))
         titles = [cf.get_title() for cf in self.get_taxed_cashflows()]
-        cashflows = [
-            [str(cf[n]).split("(")[0] for cf in self.get_taxed_cashflows()]
+        cashflows = [[cf[n] for cf in self.get_taxed_cashflows()] for n in periods]
+        
+        if net:
+            titles=["Net Cashflows"]
+            cashflows = [[sum(cashflows[n])] for n in periods]
+       
+        str_cashflows = [
+            [str(cashflow).split('(')[0] for cashflow in cashflows[n]]
             for n in periods
         ]
+        
 
         return pd.DataFrame(cashflows, index=periods, columns=titles)
 
-    def to_cashflowdiagram(self, n=None, size=None):
+    def to_cashflowdiagram(self, n=None, size=None, net=False):
         import pandas as pd
         from matplotlib import pyplot as plt
 
@@ -219,6 +226,10 @@ class Project:
         cashflows = [
             [cf[n].amount for cf in self.get_taxed_cashflows()] for n in periods
         ]
+
+        if net:
+            titles=["Net Cashflow"]
+            cashflows = [sum(cashflows[n]) for n in periods]
 
         plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
         ax = plotdata.plot(kind="bar", stacked="true", color=tab20)
@@ -300,3 +311,4 @@ class Project:
         e_fin = e_fin if e_fin is not None else self.get_interest()
         cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return mirr(cashflows, e_inv, e_fin)
+
