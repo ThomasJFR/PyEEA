@@ -215,7 +215,7 @@ class Project:
         ]
         
 
-        return pd.DataFrame(cashflows, index=periods, columns=titles)
+        return pd.DataFrame(str_cashflows, index=periods, columns=titles)
 
     def to_cashflowdiagram(self, n=None, size=None, net=False):
         import pandas as pd
@@ -232,15 +232,18 @@ class Project:
             cashflows = [sum(cashflows[n]) for n in periods]
 
         plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
-        ax = plotdata.plot(kind="bar", stacked="true", color=tab20)
+
+        fig, ax = plt.subplots()
+        if size:
+            fig.set_size_inches(size)
+        
+        plotdata.plot(kind="bar", stacked="true", ax=ax, color=tab20)
         ax.set_title(self.get_title())
         ax.set_ylabel("Cashflow")
         ax.set_xlabel("Period")
         ax.axhline()
-
-        if size:
-            fig = plt.gcf()
-            fig.set_size_inches(size)
+        
+        return fig, ax
 
     #################################
     ### PROJECT VALUATION HELPERS
