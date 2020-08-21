@@ -38,7 +38,7 @@ def bcr(cashflows, i=0) -> float:
         return None
 
 
-def irr(cashflows, i0=0) -> float:
+def irr(cashflows, i0=0.1) -> float:
     # IRR only exists if we have both net positive AND net negative cashflows over all periods.
     # Note that we need to check longer than the final period in case of perpetuities.
     nf = get_final_period(cashflows, finite=True)
@@ -63,12 +63,22 @@ def irr(cashflows, i0=0) -> float:
     return irrs[0] if success else None
 
 
-def mirr(cashflows, e_inv, e_fin, i0=0) -> float:
+def mirr(cashflows, e_inv, e_fin) -> float:
     nf = get_final_period(cashflows)
     if isinf(nf):
         return None
-
+   
     net_cashflows = [sum([cf[n] for cf in cashflows]) for n in range(nf + 1)]
-    fv_rvnu = sum([ncf.to_fv(e_fin, nf) for ncf in net_cashflows if ncf > 0])
+    if not all(
+        [
+            any([ncf > 0 for ncf in net_cashflows]),
+            any([ncf < 0 for ncf in net_cashflows]),
+        ]
+    ):
+        return None
+
+    fv_rvnu = sum([ncf.to_fv(e_fin, nf) for ncf in net_cashflows if ncf > 0]) or NullCashflow()
     pv_cost = sum([ncf.to_pv(e_inv) for ncf in net_cashflows if ncf < 0])
-    return irr([pv_cost, fv_rvnu], i0)
+
+    mirr = (fv_rvnu.amount / -pv_cost.amount)**(1/nf) - 1
+    return mirr

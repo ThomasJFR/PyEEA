@@ -24,3 +24,5 @@ from .taxation import DepreciationHelper
 from .taxation import TaxationHelper
 
 from .analysis import simulation_analysis, sensitivity_analysis
+
+from .output import write_excel
