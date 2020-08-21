@@ -1,7 +1,7 @@
 from .Cashflow import Cashflow, NullCashflow, PaymentScheme as ps
 from . import SinglePaymentFactory as sp
 from ..utilities import parse_d
-
+from math import inf
 
 class Annuity(Cashflow):
     def __init__(self, amount, d, title=None, tags=None):
@@ -27,11 +27,9 @@ class Annuity(Cashflow):
                 cfs.append(NullCashflow())
         return cfs[0] if len(cfs) == 1 else cfs
 
-    def to_shorthand(self, alt=None):
-        """
-        Example: -$10(A, [0, 10])
-        """
-        return super().to_shorthand(alt or ("A", self.d))
+    def __repr__(self, alt=None):
+        info = alt or ['A', self.d]
+        return super().__repr__(info)
 
     def to_pv(self, i):
         if i == 0:
@@ -74,8 +72,9 @@ class Gradient(Annuity):
         super().__init__(amount, d, title, tags)
         self.G = G
 
-    def to_shorthand(self):
-        return super().to_shorthand(("G", self.d, self.G))
+    def __repr__(self):
+        info = ['G', self.G, self.d]
+        return super().__repr__(info)
 
     def cashflow_at(self, ns):
         cfs = []
@@ -124,7 +123,8 @@ class Geometric(Annuity):
         self.g = g
 
     def to_shorthand(self):
-        return super().to_shorthand(("g", self.d, str(self.g * 100) + "%"))
+        info = ["g", str(self.g * 100) + "%", self.d]
+        return super().__repr__(info)
 
     def cashflow_at(self, ns):
         cfs = []
@@ -175,39 +175,23 @@ class Geometric(Annuity):
     def to_av(self, i, d):
         return self.to_pv(i).to_av(i, d)
 
-
-class Perpetuity(Cashflow):
+class Perpetuity(Annuity):
     def __init__(self, amount, d0=0, title=None, tags=None):
-        super().__init__(amount, title, tags)
-        if type(d0) is not int:
-            raise TypeError("Parameter d0 must be an integer!")
-        self.d0 = d0
+        super().__init__(amount, [d0, inf], title, tags)
 
     def __add__(self, other):
         if not all([type(self) == Perpetuity, type(other) == Perpetuity]):
-            return NotImplemented
-        if self.d0 == other.d0:
-            val = self.amount + other.amount
-            return Perpetuity(val, self.d0, self.title, self.tags)
+            raise TypeError("Perpetuities can only be added to other Perpetuities!")
+        if self.d != other.d:
+            return ValueError("Summed Perpetuities must have equal lifetimes d!")
         else:
-            return ValueError("Added annuities must have equal durations")
-
-    def to_shorthand(self, alt=None):
-        return super().to_shorthand(alt or ("A", "[{}, inf]".format(self.d0)))
-
-    def cashflow_at(self, ns):
-        cfs = []
-        for n in ns:
-            if n > self.d0:
-                cfs.append(sp.Future(self.amount, n, self.title, self.tags))
-            else:
-                cfs.append(NullCashflow())
-        return cfs[0] if len(cfs) == 1 else cfs
+            val = self.amount + other.amount
+            return Perpetuity(val, self.d)
 
     def to_pv(self, i):
         xv = self.amount / i
-        if self.d0 > 0:
-            return sp.Future(xv, self.d0, self.title, self.tags).to_pv(i)
+        if self.d[0] > 0:
+            return sp.Future(xv, self.d[0], self.title, self.tags).to_pv(i)
         else:
             return sp.Present(xv, self.title, self.tags)
 
@@ -218,25 +202,9 @@ class Perpetuity(Cashflow):
         return self.to_pv(i).to_av(i, d)
 
 
-class GeoPerpetuity(Perpetuity):
+class GeoPerpetuity(Geometric):
     def __init__(self, amount, g, d0=0, title=None, tags=None):
-        super().__init__(amount, d0, title, tags)
-        self.g = g  # Geometric rate
-
-    def to_shorthand(self):
-        return super().to_shorthand(
-            ("g", "[{}, inf]".format(self.d0), str(self.g * 100) + "%")
-        )
-
-    def cashflow_at(self, ns):
-        cfs = []
-        for n in ns:
-            if n > self.d0:
-                fv = self.amount * (1 + self.g) ** (n - self.d0 - 1)
-                cfs.append(sp.Future(fv, n, self.title, self.tags))
-            else:
-                cfs.append(NullCashflow())
-        return cfs[0] if len(cfs) == 1 else cfs
+        super().__init__(amount, g, [d0, inf], title, tags)
 
     def to_pv(self, i):
         if i <= self.g:
@@ -245,7 +213,7 @@ class GeoPerpetuity(Perpetuity):
             )
 
         xv = self.amount / (i - self.g)
-        if self.d0 > 0:
+        if self.d[0] > 0:
             return sp.Future(xv, n, self.title, self.tags)
         else:
             return sp.Present(xv, self.title, self.tags)

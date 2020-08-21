@@ -77,11 +77,9 @@ class Future(Cashflow):
         cfs = [self if n == self.n else NullCashflow() for n in ns]
         return cfs[0] if len(cfs) == 1 else cfs
 
-    def to_shorthand(self, alt=None):
-        """
-        Example: -$12,000(F, 6)
-        """
-        return super().to_shorthand(alt or ("F", self.n))
+    def __repr__(self, alt=None):
+        info = alt or ['F', self.n]
+        return super().__repr__(info)
 
     def to_pv(self, i):
         present_worth_factor = (1 + i) ** -self.n
@@ -119,11 +117,9 @@ class Present(Future):
         if isinstance(other, Number):
             return Present(self.amount * other, self.title, self.tags)
 
-    def to_shorthand(self):
-        """
-        Example: $24,000(P)
-        """
-        return super().to_shorthand(("P"))
+    def __repr__(self):
+        info = ['P']
+        return super().__repr__(info)
 
     def to_pv(self, i=None):
         return self

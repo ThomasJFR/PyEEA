@@ -46,14 +46,14 @@ class Cashflow(ABC):
         Cashflow.cashflow_id += 1
 
     def __str__(self):
-        """
-        Author: Thomas Richmond
-        Purpose: Displays a cash amount in a pretty format.
-                 To display any additional info in children,
-                 overwrite this function 
-        Example: -$12,600,120.12(STUFF)
-        """
-        return self.to_shorthand()  # This will call from the context of the child.
+        valstr = Cashflow.CURRENCY_FMT_STR.format(self.amount)
+        valstr = valstr.replace("$-", "-$")
+        return valstr
+
+    def __repr__(self, info=[]):
+        valstr = self.__str__()
+        infostr = ", ".join([str(i) for i in info]).replace('\'', '')
+        return f"{valstr}({infostr})"
 
     def __radd__(self, other):
         if other == 0:  # first iteration of sum()
@@ -88,16 +88,7 @@ class Cashflow(ABC):
             self.add_tag(tag)
 
     def to_shorthand(self, info):
-        # Step 1: Add the cash amount
-        # EXAMPLE: -$12,229,999.99
-        valstr = Cashflow.CURRENCY_FMT_STR.format(self.amount)
-        valstr = valstr.replace("$-", "-$")
-        # Step 2: Add notated information
-        # EXAMPLE: (G, [2,5], 210)
-        info = (
-            info if isinstance(info, Iterable) else [info]
-        )  # Make info iterable if it isn't
-        infostr = "(" + ", ".join([str(i) for i in info]) + ")"
+        
 
         return valstr + infostr
 
@@ -138,6 +129,10 @@ class NullCashflow(Cashflow):
     def __init__(self, title=None, tags=None):
         return super().__init__(0)
 
+    def __repr__(self):
+        info = ['N']
+        return super().__repr__(info)
+
     def __add__(self, other):
         return other
 
@@ -160,9 +155,6 @@ class NullCashflow(Cashflow):
 
     def __ge__(self, them):
         return not self.__lt__(them)
-
-    def to_shorthand(self):
-        return super().to_shorthand(("N",))
 
     def cashflow_at(self, n):
         return self
