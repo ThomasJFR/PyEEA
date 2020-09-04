@@ -78,9 +78,10 @@ def get_final_period(cashflows, finite=True):
         if isinstance(cf, Future):  # also accounts for present
             return cf.n
         elif isinstance(cf, Annuity):
-            return cf.d[1]
-        elif isinstance(cf, Perpetuity):
-            return cf.d0 if finite else inf
+            if finite and cf.d[1] is inf:
+                return cf.d[0]
+            else:
+                return cf.d[1]
         elif isinstance(cf, Dynamic):
             return cf.d[1]
         elif isinstance(cf, Depreciation):
