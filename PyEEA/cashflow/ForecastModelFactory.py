@@ -25,8 +25,9 @@ class LearningCurve(Annuity):
         self.b = log(self.learning_rate) / log(2.0)
         self.final_amount = final_amount
 
-    def to_shorthand(self):
-        return super().to_shorthand(["l=%f" % self.learning_rate])
+    def __repr__(self):
+        info = ["LC", "%f%%" % self.learning_rate]
+        return super().__repr__(info)
 
     def cashflow_at(self, ns):
         cashflows = []

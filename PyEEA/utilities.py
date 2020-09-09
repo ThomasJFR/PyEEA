@@ -1,6 +1,12 @@
 from math import inf, isinf
 from typing import Iterable
 
+from enum import Enum
+
+class Scales(Enum):
+    THOUSANDS = 1.E-3
+    MILLIONS  = 1.E-6
+    BILLIONS  = 1.E-9
 
 def parse_d(d):
     """
@@ -78,9 +84,10 @@ def get_final_period(cashflows, finite=True):
         if isinstance(cf, Future):  # also accounts for present
             return cf.n
         elif isinstance(cf, Annuity):
-            return cf.d[1]
-        elif isinstance(cf, Perpetuity):
-            return cf.d0 if finite else inf
+            if finite and cf.d[1] is inf:
+                return cf.d[0]
+            else:
+                return cf.d[1]
         elif isinstance(cf, Dynamic):
             return cf.d[1]
         elif isinstance(cf, Depreciation):
