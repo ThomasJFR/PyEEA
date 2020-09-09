@@ -28,3 +28,6 @@ from .analysis import simulation_analysis, sensitivity_analysis
 from .output import write_excel
 
 from .utilities import Scales
+
+__version__ = "0-A2"
+__author__ = "Thomas Richmond"
