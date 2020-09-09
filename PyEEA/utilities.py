@@ -1,6 +1,12 @@
 from math import inf, isinf
 from typing import Iterable
 
+from enum import Enum
+
+class Scales(Enum):
+    THOUSANDS = 1.E-3
+    MILLIONS  = 1.E-6
+    BILLIONS  = 1.E-9
 
 def parse_d(d):
     """
