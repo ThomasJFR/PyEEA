@@ -7,16 +7,11 @@ from .taxation import TaxationHelper as th, DepreciationHelper as dh
 
 from .valuation import npw, nfw, eacf, epcf, bcr, irr, mirr
 
-from .utilities import parse_d, parse_ns, get_final_period
+from .output import generate_cashflow_diagram
+
+from .utilities import Scales, parse_d, parse_ns, get_final_period
 
 from math import isinf
-
-from matplotlib.cm import get_cmap
-
-name = "tab20"
-cmap = get_cmap(name)  # type: matplotlib.colors.ListedColormap
-tab20 = cmap.colors  # type: list
-
 
 class Project:
     """
@@ -210,39 +205,22 @@ class Project:
             cashflows = [[sum(cashflows[n])] for n in periods]
        
         str_cashflows = [
-            [str(cashflow).split('(')[0] for cashflow in cashflows[n]]
+            [str(cashflow).split(" ")[-1] for cashflow in cashflows[n]]
             for n in periods
         ]
         
 
         return pd.DataFrame(str_cashflows, index=periods, columns=titles)
 
-    def to_cashflowdiagram(self, n=None, size=None, net=False):
-        import pandas as pd
-        from matplotlib import pyplot as plt
-
-        periods = list(range((n or self.get_final_period(finite=True) or 5) + 1))
-        titles = [cf.get_title() for cf in self.get_taxed_cashflows()]
-        cashflows = [
-            [cf[n].amount for cf in self.get_taxed_cashflows()] for n in periods
-        ]
-
-        if net:
-            titles=["Net Cashflow"]
-            cashflows = [sum(cashflows[n]) for n in periods]
-
-        plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
-
-        fig, ax = plt.subplots()
+    def to_cashflowdiagram(self, n=None, net=False, scale=None, size=None):
+        fig, ax = generate_cashflow_diagram(
+                self.get_taxed_cashflows(),
+                n,
+                net,
+                scale,
+                title=self.get_title())
         if size:
             fig.set_size_inches(size)
-        
-        plotdata.plot(kind="bar", stacked="true", ax=ax, color=tab20)
-        ax.set_title(self.get_title())
-        ax.set_ylabel("Cashflow")
-        ax.set_xlabel("Period")
-        ax.axhline()
-        
         return fig, ax
 
     #################################
