@@ -149,7 +149,12 @@ class Project:
         
         if type(tags) is str:
             tags = [tags]
-        return [cashflow for cashflow in self._cashflows for tag in tags if tag in cashflow.tags]
+        
+        cashflows = [
+            [cashflow for cashflow in self._cashflows if tag in cashflow.tags]
+            for tag in tags
+        ]
+        return cashflows[0] if len(cashflows) == 1 else cashflows
 
     def get_depreciations(self, tags=None):
         if not tags:
