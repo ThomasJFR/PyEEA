@@ -23,7 +23,12 @@ from .cashflow import (
 from .taxation import DepreciationHelper
 from .taxation import TaxationHelper
 
-from .analysis import simulation_analysis, sensitivity_analysis
+from .analysis import (
+    ScalarAnalysis,
+    SensitivityAnalysis,
+    simulation_analysis,
+    sensitivity_analysis
+)
 
 from .output import write_excel
 
