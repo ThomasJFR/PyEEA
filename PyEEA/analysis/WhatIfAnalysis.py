@@ -1,5 +1,5 @@
 from copy import deepcopy
-from collections.abc import Iterable
+from collections.abc import Collection
 
 from ..valuators import npw, nfw, eacf, eacp, bcr, irr, mirr
 
@@ -7,13 +7,16 @@ from ..valuators import npw, nfw, eacf, eacp, bcr, irr, mirr
 class WhatIfAnalysis:
     def __init__(self, project):
         self._project = deepcopy(project)
-        self._valuator
 
-    def analyse(self, cashflows):
-        if not isinstance(cashflows, Iterable):
+    def apply(self, cashflows):
+        if not isinstance(cashflows, Collection):
             cashflows = [cashflows]
         self._project.add_cashflows(cashflows)
         return self._project
+
+    def valuate(self):
+        
+
 
     def get_project():
         return self._project
@@ -31,3 +34,4 @@ class SensitivityAnalysis(WhatIfAnalysis):
 
 class SimulationAnalysis(WhatIfAnalysis):
     pass
+
