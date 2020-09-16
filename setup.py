@@ -1,8 +1,8 @@
-from distutils.core import setup
+from setuptools import setup
+
 setup(
   name = 'PyEEA',
-  packages = ['PyEEA'],
-  version = '1.0-A',
+  version = '0a2',
   license='MIT',
   description = 'A Python3.8 library for conducting Engineering Economic Analyses',
   author = 'Thomas Richmond',
@@ -10,10 +10,18 @@ setup(
   url = 'https://github.com/ThomasJFR/PyEEA',
   download_url = 'https://github.com/ThomasJFR/PyEEA/archive/v0.1.1.tar.gz',
   keywords = ['Engineering', 'Economic', 'Analysis', 'Finance'],
+  packages = [
+    'PyEEA',
+    'PyEEA.analysis',
+    'PyEEA.cashflow',
+    'PyEEA.output',
+    'PyEEA.taxation',
+    'PyEEA.valuation'
+  ],
   install_requires = [
-    'scipy',
     'pandas',
-    'matplotlib'
+    'matplotlib',
+    'scipy'
   ],
   classifiers=[
     'Development Status :: 3 - Alpha',

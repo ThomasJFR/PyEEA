@@ -228,9 +228,8 @@ class Project:
             fig.set_size_inches(size)
         return fig, ax
 
-    #################################
-    ### PROJECT VALUATION HELPERS
-    ###
+
+    ## PROJECT VALUATION HELPERS
 
     def npw(self, i=None, after_tax=True, tags=None):
         i = i if i is not None else self.get_interest()
