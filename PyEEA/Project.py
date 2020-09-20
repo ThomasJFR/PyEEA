@@ -14,21 +14,28 @@ from .utilities import Scales, parse_d, parse_ns, get_final_period
 from math import isinf
 
 class Project:
-    """
-    Author: Thomas Richmond
-    Description: A collection of revenues and costs for a project.
-                 Projects serve to (i) encapsulate a set of costs,
-                 (ii) enable more advanced project worth analysis, and
-                 (iii) define a common interest rate for all cash flows.
-    Parameters: name [string] - A human-readable name used to distinguish
-                                the project from others. This is especially
-                                important when exporting projects to other 
-                                forms, e.g. charts or spreadsheets.
-                interest [number] - The interest rate to apply to all
-                                    cash flows within the project.
+    """ Contains many cashflows and shortcuts for analysis
+
+    Projects contain cashflows and related constructs. (e.g. Tax
+    schemes and Depreciating assets) Properties such as interest are 
+    kept constant across all cashflows. The aggregate cashflows can
+    be easily visualized, manipulated and analyzed to glean information
+    about the emergent nature of the cashflows.
+
+    See Also:
+        Cashflow
+        Depreciation
+        Tax
     """
 
     def __init__(self, title=None, interest=0):
+        """ Creates a project containing no cashflows or related constructs
+
+        Args:
+            title: Optional; A human-readable summary of the project
+            interest: Optional; An interest rate to be applied across all 
+                project cashflows and related constructs
+        """
         self._title = str(title)
         self._interest = float(interest)
 
@@ -36,7 +43,7 @@ class Project:
         self._depreciations = list()
         self._taxes = list()
 
-    def __str__(self):
+    def __repr__(self):
         return self.to_dataframe().to_string()
 
     def __getitem__(self, val):
@@ -228,6 +235,9 @@ class Project:
             fig.set_size_inches(size)
         return fig, ax
 
+    def show(self, n=None, net=False, scale=None, size=None):
+        self.to_cashflowdiagram(n, net, scale, size)
+        plt.show()
 
     ## PROJECT VALUATION HELPERS
 
