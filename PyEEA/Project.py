@@ -236,6 +236,7 @@ class Project:
         return fig, ax
 
     def show(self, n=None, net=False, scale=None, size=None):
+        from matplotlib import pyplot as plt
         self.to_cashflowdiagram(n, net, scale, size)
         plt.show()
 
