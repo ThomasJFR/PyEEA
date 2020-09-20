@@ -1,5 +1,5 @@
 # __init__.py
-from .Cashflow import Cashflow, NullCashflow, PaymentScheme
+from .Cashflow import Cashflow, NullCashflow
 
 from .SinglePaymentFactory import Present, Future
 from .UniformSeriesFactory import (
