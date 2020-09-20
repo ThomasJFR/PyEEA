@@ -122,10 +122,6 @@ class Geometric(Annuity):
         super().__init__(amount, d, title, tags)
         self.g = g
 
-    def to_shorthand(self):
-        info = ["g", str(self.g * 100) + "%", self.d]
-        return super().__repr__(info)
-
     def cashflow_at(self, ns):
         cfs = []
         for n in ns:
@@ -174,6 +170,10 @@ class Geometric(Annuity):
 
     def to_av(self, i, d):
         return self.to_pv(i).to_av(i, d)
+
+    def __repr__(self):
+        info = ["g", str(self.g * 100) + "%", self.d]
+        return super().__repr__(info)
 
 class Perpetuity(Annuity):
     def __init__(self, amount, d0=0, title=None, tags=None):
