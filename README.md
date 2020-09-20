@@ -1,9 +1,20 @@
-# PyEEA - A Python Engineering Economics Analysis Library [ALPHA]
+# PyEEA - A Python Engineering Economics Analysis Library
 <img align='right' src='./assets/logo.ico' alt=''/>
 
-A Python3 library for performing engineering economics analysis. Styled using [Black](https://github.com/psf/black)
+A Python3 library for performing engineering economics analysis.
 
-Developed by Thomas Richmond with help from MArkos Frazzer.
+``` Python
+from PyEEA import Project, Present, Future, Annuity
+
+msp = Project("My Sample Project", 0.12)
+msp.add_cashflows([
+    Present(-1000),
+    Annuity(200, 5),
+    Future(100, 6)
+])
+msp.show()
+```
+
 
 ## Features
 
