@@ -1,4 +1,4 @@
-from .Cashflow import Cashflow, NullCashflow, PaymentScheme as ps
+from .Cashflow import Cashflow, NullCashflow
 from . import SinglePaymentFactory as sp
 from ..utilities import parse_d
 from math import inf
@@ -57,7 +57,7 @@ class Annuity(Cashflow):
             fpv = self.amount * ((1 + i) ** self.dn - 1) / (i * (1 + i) ** self.dn)
             return sp.Future(fpv, d[0], self.title, self.tags).to_pv(i).to_fv(i, n)
 
-    def to_av(self, i, d, scheme=ps.ARREAR):
+    def to_av(self, i, d):
         d = parse_d(d)
         D = d[1] - d[0]
 
