@@ -44,9 +44,14 @@ class Project:
         self._taxes = list()
 
     def __repr__(self):
+        """ Prints table of Cashflows vs periods """
         return self.to_dataframe().to_string()
 
     def __getitem__(self, val):
+        """ Retrieves cashflows by tags or periods
+        
+        Proxy for...
+        """
         # OPTION 1: Index by tags
         if type(val) is str:
             matches = self.get_cashflows(tags=val)
@@ -63,32 +68,15 @@ class Project:
                 step = val.step or 1
                 ns = range(start, stop, step)
 
-            # TODO ADD SUPPORT FOR TAXATION
-            def get_cashflows_for_period(n):
-                def do_include_cashflow(cf):
-                    return any(
-                        [
-                            isinstance(cf, sp.Future) and n == cf.n,
-                            isinstance(cf, us.Annuity) and cf.d[0] < n <= cf.d[1],
-                            isinstance(cf, us.Perpetuity) and n > cf.d0,
-                            isinstance(cf, ds.Dynamic) and cf.d[0] < n <= cf.d[1],
-                        ]
-                    )
-
-                return [cf for cf in self.get_cashflows() if do_include_cashflow(cf)]
-
-            cashflows = [[cf[n] for cf in get_cashflows_for_period(n)] for n in ns]
+            cashflows = [
+                    [
+                        cashflow[n] 
+                        for cashflow in self.get_cashflows()
+                        if not isinstance(cashflow[n], NullCashflow)
+                    ]
+                    for n in ns
+                ]
             return cashflows[0] if len(cashflows) == 1 else cashflows
-
-    def __enter__(self):
-        from copy import deepcopy
-
-        self._cashflows_copy = deepcopy(self._cashflows)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._cashflows = self._cashflows_copy
-        del self._cashflows_copy
 
     def set_title(self, title):
         self._title = title
@@ -105,6 +93,12 @@ class Project:
         return self._interest
 
     def get_final_period(self, finite=False):
+        """ Returns the highest period in which Cashflows are still active
+
+        Args:
+            finite: If true, the method can return infinity if the project
+                contains instances of Perpetuity
+        """
         nf = get_final_period(self.get_cashflows(), finite=finite)
         return nf
 
