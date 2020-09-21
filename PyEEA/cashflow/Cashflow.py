@@ -28,14 +28,14 @@ class Cashflow(ABC):
         be called first in children. Each Cashflow is assigned a unique ID.
         """
         self._id = Cashflow.cashflow_id
-        self.amount = float(amount)
-        self.title = str(title or f"{self.get_classname()} {self._id}") 
-        self.tags = list((self.title,))
+        self._amount = float(amount)
+        self._title = str(title or f"{self.get_classname()} {self._id}") 
+        self._tags = list((self.title,))
         if tags:
             if isinstance(tags, str):
-                self.tags.append(tags)
+                self._tags.append(tags)
             else:
-                self.tags.extend(tags)
+                self._tags.extend(tags)
         Cashflow.cashflow_id += 1
 
     @abstractmethod
@@ -123,11 +123,33 @@ class Cashflow(ABC):
         """""
         pass
 
-    def __str__(self):
-        valstr = Cashflow.CURRENCY_FMT_STR.format(self.amount)
-        valstr = valstr.replace("$-", "-$")
-        return valstr
+    @property
+    def amount(self):
+        return self._amount
 
+    @property
+    def title(self)
+        return self.title
+    
+    def set_title(self, title):
+        self.title = title
+        self.tags[0] = self.title  # Position zero contains the title
+
+    def get_title(self):
+        print("")
+        return self.title
+
+    @propety
+    def tags(self):
+        return self._tags
+
+    def add_tag(self, tag):
+        self.tags.append(tag)
+
+    def add_tags(self, tags):
+        for tag in tags:
+            self.add_tag(tag)
+    
     def __repr__(self, info):
         """ Returns an unambiguous string representation of the Cashflow
        
@@ -168,27 +190,18 @@ class Cashflow(ABC):
         infostr = infostr.replace('\'', '')  # Remove unnecessary quotation marks
         return f"{valstr}({infostr})"
 
-    def set_title(self, title):
-        self.title = title
-        self.tags[0] = self.title  # Position zero contains the title
+    def __str__(self):
+        valstr = Cashflow.CURRENCY_FMT_STR.format(self.amount)
+        valstr = valstr.replace("$-", "-$")
+        return valstr
 
-    def get_title(self):
-        return self.title
-
-    def add_tag(self, tag):
-        self.tags.append(tag)
-
-    def add_tags(self, tags):
-        for tag in tags:
-            self.add_tag(tag)
-    
     def __getitem__(self, ns):
         """ Proxy for cashflow_at() method """
         ns = parse_ns(ns)
         return self.cashflow_at(ns)
 
     def __radd__(self, other):
-        if other == 0:  # Account for first iteration of sum()
+        if other == 0:  # Accounts for first iteration of sum()
             return self
         else:
             return self.__add__(other)
