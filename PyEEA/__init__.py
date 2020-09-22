@@ -30,6 +30,16 @@ from .analysis import (
     sensitivity_analysis
 )
 
+from .valuation import (
+    npw,
+    nfw,
+    eacf,
+    epcf,
+    bcr,
+    irr,
+    mirr,
+)
+
 from .output import write_excel
 
 from .utilities import Scales

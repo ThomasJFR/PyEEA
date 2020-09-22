@@ -290,7 +290,7 @@ class Project:
                 n,
                 net,
                 scale,
-                title=self.get_title())
+                title=self.title)
         if size:
             fig.set_size_inches(size)
         return fig, ax
@@ -303,7 +303,7 @@ class Project:
     ## PROJECT VALUATION HELPERS
 
     def npw(self, i=None, after_tax=True, tags=None):
-        i = i if i is not None else self.get_interest()
+        i = i if i is not None else self.interest
         if i is None:
             raise ValueError(
                 "No interest provided for npw calculations."
@@ -313,7 +313,7 @@ class Project:
         return npw(cashflows, i)
 
     def nfw(self, n, i=None, after_tax=True, tags=None):
-        i = i if i is not None else self.get_interest()
+        i = i if i is not None else self.interest
         if i is None:
             raise ValueError(
                 "No interest provided for nfw calculations."
@@ -328,7 +328,7 @@ class Project:
         if isinf(d[1]):
             return self.epcf(d[0], i, after_tax, tags=tags)
 
-        i = i if i is not None else self.get_interest()
+        i = i if i is not None else self.interest
         if i is None:
             raise ValueError(
                 "No interest provided for eacf calculations."
@@ -338,7 +338,7 @@ class Project:
         return eacf(cashflows, i, d)
 
     def epcf(self, d0=0, i=None, after_tax=True, tags=None):
-        i = i if i is not None else self.get_interest()
+        i = i if i is not None else self.interest
         if i is None:
             raise ValueError(
                 "No interest provided for eacf calculations."
@@ -352,7 +352,7 @@ class Project:
         return bcr(cashflows)
 
     def irr(self, i0=None, after_tax=True, tags=None):
-        i0 = i0 if i0 is not None else self.get_interest()
+        i0 = i0 if i0 is not None else self.interest
         if i0 is None:
             raise ValueError(
                 "No initial interest guess provided for irr calculations."
@@ -363,8 +363,52 @@ class Project:
         return irr(cashflows, i0)
 
     def mirr(self, e_inv=None, e_fin=None, after_tax=True, tags=None):
-        e_inv = e_inv if e_inv is not None else self.get_interest()
+        e_inv = e_inv if e_inv is not None else self.interest
         e_fin = e_fin if e_fin is not None else e_inv
         cashflows = self.get_taxed_cashflows(tags=tags) if after_tax else self.get_cashflows(tags=tags)
         return mirr(cashflows, e_inv, e_fin)
+    
+    def __repr__(self):
+        """ Prints table of Cashflows vs periods """
+        return self.to_dataframe().to_string()
 
+    def __getitem__(self, val):
+        """ Retrieves cashflows by tags or periods
+        
+        Proxy for...
+        """
+        # OPTION 1: Index by tags
+        if type(val) is str:
+            matches = self.get_cashflows(tags=val)
+            return matches
+        # OPTION 2: Index by periods
+        else:
+            if type(val) == int:
+                ns = (val,)  # Get the cashflows in a period as an array
+            elif type(val) == tuple:
+                ns = val  # Get the cashflows of multiple periods as a 2D array
+            elif type(val) == slice:
+                start = val.start or 0
+                stop = (val.stop or self.get_final_period(finite=True)) + 1
+                step = val.step or 1
+                ns = range(start, stop, step)
+
+            cashflows = [
+                    [
+                        cashflow[n] 
+                        for cashflow in self.get_cashflows()
+                        if not isinstance(cashflow[n], NullCashflow)
+                    ]
+                    for n in ns
+                ]
+            return cashflows[0] if len(cashflows) == 1 else cashflows
+
+    def __enter__(self):
+        from copy import deepcopy
+
+        self._cashflows_copy = deepcopy(self._cashflows)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._cashflows = self._cashflows_copy
+        del self._cashflows_copy

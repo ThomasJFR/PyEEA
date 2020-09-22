@@ -127,19 +127,23 @@ class Cashflow(ABC):
     def amount(self):
         return self._amount
 
+    @amount.setter
+    def amount(self, val):
+        self._amount = float(val)
+
     @property
-    def title(self)
-        return self.title
+    def title(self):
+        return self._title
     
     def set_title(self, title):
-        self.title = title
-        self.tags[0] = self.title  # Position zero contains the title
+        self._title = str(title)
+        self._tags[0] = self.title  # Position zero contains the title
 
     def get_title(self):
         print("")
         return self.title
 
-    @propety
+    @property
     def tags(self):
         return self._tags
 
@@ -258,6 +262,9 @@ class NullCashflow(Cashflow):
         info = ('N',)  # Explicitly indicates that Cashflow is null
         return super().__repr__(info)
 
+    def __neg__(self):
+        return self
+    
     def __add__(self, other):
         return other
 

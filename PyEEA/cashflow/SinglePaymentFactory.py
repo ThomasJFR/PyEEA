@@ -79,9 +79,10 @@ class Future(Cashflow):
             A new Future instance whose amount is the sum of the arguments.
         """
         if not isinstance(other, Future):
-            raise TypeError(
-                "Can only sum Future instance with another Future instance"
-                "having the same period n!")
+            return NotImplemented
+            #raise TypeError(
+            #    "Can only sum Future instance with another Future instance"
+            #    "having the same period n!")
         if self.n != other.n:
             raise ValueError(
                 "Future instances being added must have the same period n!")
@@ -176,12 +177,12 @@ class Present(Future):
             other: A second Present instance to be added to this one
 
         Returns:
-            A new PResent instance whose amount is the sum of the arguments.
+            A new Present instance whose amount is the sum of the arguments.
         """
         if not isinstance(other, Present):
-            raise TypeError("Can only sum Future instance with another Present instance!")
+            return NotImplemented  #("Can only sum Present instance with another Present instance!")
         val = self.amount + other.amount
-        return Present(val, self.title, self.tags)
+        return Present(val)
 
 
     def __mul__(self, other):
