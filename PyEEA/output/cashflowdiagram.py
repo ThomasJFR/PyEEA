@@ -8,7 +8,30 @@ cmap = get_cmap(name)  # type: matplotlib.colors.ListedColormap
 tab20 = cmap.colors    # type: list
 
 
-def generate_cashflow_diagram(cashflows, d=None, net=False, scale=None, title=None):
+def generate_cashflow_diagram(
+        cashflows, d=None, net=False, scale=None, title=None, **kwargs):
+    """ Generates a barplot showing cashflows over time
+
+    Given a set of cashflows, produces a stacked barplot with bars at each
+    period. The height of each bar is set by the amount of cash produced
+    by a cashflow at the specified period.
+
+    Note that this function does not display the produced plot; call
+    matplotlib.pyplot.show() to view the plot.
+
+    Args:
+        cashflows: A sequence of cashflows to plot
+        d: Optional; A two-integer list whose elements represent the first
+            and final periods to be plotted
+        net: Optional; When true, only the net cashflows are shown, and the
+            individual cashflow information is omitted.
+        scale: Optional; The y-axis scale; must be a member or key of Scales
+        kwargs: A list of keyword arguments to be passed to Dataframe.plot()
+    
+    Returns:
+        A Figure and Axis for the plot
+    """
+
     # Parse Args
     d = parse_d(d or get_final_period(cashflows, finite=True) or 5)
     net = bool(net)
@@ -27,9 +50,7 @@ def generate_cashflow_diagram(cashflows, d=None, net=False, scale=None, title=No
 
     # Format information
     if net:
-        cashflows = [
-            [sum(cashflows[n])] for n in periods
-        ]
+        cashflows = [[sum(cashflows[n])] for n in periods]
     if scale:
         cashflows = [
             [cashflow * scale.value for cashflow in cashflows[n]]
@@ -40,7 +61,7 @@ def generate_cashflow_diagram(cashflows, d=None, net=False, scale=None, title=No
     plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
     fig, ax = plt.subplots()
 
-    plotdata.plot(kind="bar", stacked="true", ax=ax, color=tab20)
+    plotdata.plot(kind="bar", stacked="true", ax=ax, color=tab20, **kwargs)
     ax.set_title(title)
     ax.set_ylabel("Cashflows" + (scale.name.lower() if scale else ""))
     ax.set_xlabel("Period")
