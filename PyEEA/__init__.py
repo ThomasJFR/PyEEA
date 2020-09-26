@@ -25,6 +25,7 @@ from .taxation import TaxationHelper
 
 from .analysis import (
     ScalarAnalysis,
+    WhatIfAnalysis,
     SensitivityAnalysis,
     simulation_analysis,
     sensitivity_analysis

@@ -52,13 +52,25 @@ class ValueAnalysis(ABC):
         valuator_fun = getattr(self._project, valuator)
         return valuator_fun(**kwargs)        
 
-    @abstractmethod
+
     def show(self):
-        pass
+        """ Default behaviour for visualization of analysis
+
+        Can be overwritten in subclasses who would benefit from an alternative
+        implementation
+        """
+        return self._project.show()
 
     def get_project(self):
         return self._project
 
+class WhatIfAnalysis(ValueAnalysis):
+    def apply(self, *args):
+        if isinstance(args[0], Sequence):
+            cashflows = args[0]
+        else:
+            cashflows = args
+        self._project.add_cashflows(cashflows)
 
 class ScalarAnalysis(ValueAnalysis):
     """ Valuates a project with scaled cashflows
@@ -68,10 +80,6 @@ class ScalarAnalysis(ValueAnalysis):
     with a particular tag are multiplied by the corresponding scalar. Then,
     a valuation is performed which reveals the effect of this change.
     """
-
-    def __init__(self, project):
-        """ See base class """
-        super().__init__(project)
 
     def apply(self, *args):
         """ Parses a mapping of strings and floats
@@ -93,6 +101,8 @@ class ScalarAnalysis(ValueAnalysis):
                 raise TypeError("Sequence cannot be str")
             elif isinstance(sequence, Sequence):
                 scalarmap = {tag: scalar for tag, scalar in sequence}
+            elif isinstance(sequence, dict):
+                scalarmap = sequence
         elif len(args) == 2:
             scalarmap = {args[0]: args[1]}
         else:
@@ -102,9 +112,6 @@ class ScalarAnalysis(ValueAnalysis):
             for cashflow in self._project[tag]:
                 cashflow.amount *= scalarmap[tag]
     
-    def show():
-        return self._project.show()
-
 class SensitivityAnalysis(ValueAnalysis):
     """ Scalar analysis applied across a sequence of scalars
 
