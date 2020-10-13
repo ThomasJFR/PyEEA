@@ -1,17 +1,17 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.cm import get_cmap
+from matplotlib.colors import Colormap
 from ..utilities import Scales, parse_d, get_final_period
 
 name = "tab20"
-cmap = get_cmap(name)  # type: matplotlib.colors.ListedColormap
-tab20 = cmap.colors    # type: list
+def_cmap = get_cmap(name)  # type: matplotlib.colors.ListedColormap
 
-
-def generate_cashflow_diagram(cashflows, d=None, net=False, scale=None, title=None):
+def generate_cashflow_diagram(cashflows, d=None, net=False, scale=None, color=None, title=None):
     # Parse Args
     d = parse_d(d or get_final_period(cashflows, finite=True) or 5)
     net = bool(net)
+    color = (color.colors if isinstance(color, Colormap) else color) or def_cmap
     if scale:
         scale = (
             scale if isinstance(scale, Scales) else
@@ -40,9 +40,9 @@ def generate_cashflow_diagram(cashflows, d=None, net=False, scale=None, title=No
     plotdata = pd.DataFrame(cashflows, index=periods, columns=titles)
     fig, ax = plt.subplots()
 
-    plotdata.plot(kind="bar", stacked="true", ax=ax, color=tab20)
+    plotdata.plot(kind="bar", stacked="true", ax=ax, color=color)
     ax.set_title(title)
-    ax.set_ylabel("Cashflows" + (scale.name.lower() if scale else ""))
+    ax.set_ylabel("Cashflows" + (f" [{scale.name.title()}]" if scale else ""))
     ax.set_xlabel("Period")
     ax.axhline()
             
