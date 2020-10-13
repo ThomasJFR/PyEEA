@@ -285,6 +285,18 @@ class Project:
         return pd.DataFrame(str_cashflows, index=periods, columns=titles)
 
     def to_cashflowdiagram(self, n=None, net=False, scale=None, color=None, size=None):
+        """ Plots the project as a bar plot of cashflow by period
+
+        Args:
+            n: The period to plot to
+            net: Optional: If true, the Net cashflows are plotted, instead
+                of splitting cashflows into colored bars
+            scale: Optional: Applies a scalar multiplier to all cashflows
+            size: Optional; The size of the output plot, in inches
+
+        Returns:
+            The Figure and Axis objects generated
+        """
         fig, ax = generate_cashflow_diagram(
                 self.get_taxed_cashflows(),
                 n,
@@ -297,11 +309,11 @@ class Project:
         return fig, ax
 
     def show(self, n=None, net=False, scale=None, size=None):
+        """ Wrapper to show the results of to_cashflowdiagram """
         from matplotlib import pyplot as plt
         self.to_cashflowdiagram(n, net, scale, size)
         plt.show()
 
-    ## PROJECT VALUATION HELPERS
 
     def npw(self, i=None, after_tax=True, tags=None):
         i = i if i is not None else self.interest
@@ -413,3 +425,4 @@ class Project:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._cashflows = self._cashflows_copy
         del self._cashflows_copy
+

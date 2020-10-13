@@ -4,77 +4,130 @@ from ..utilities import parse_d
 from math import inf
 
 class Annuity(Cashflow):
+    """ A recurring uniform payment
+
+    Represents a payment recurring over several periods. Payments are made in
+    arrear - that is, at the end of a period. The cashflow recurs over the
+    duration specified by d. For example, a transfer in of amount 750 made
+    from period 1 to 4 can be represented by the following cashflow diagram:
+
+                    ^     ^     ^     ^  750
+                    |     |     |     |
+                    |     |     |     |
+        0 --- 1 --- 2 --- 3 --- 4 --- 5 --- 6 --- 
+
+    The first payment occurs at the end of period 1, which is equivalent to
+    the start of period two. Similarly, the final payment occurs at the 
+    end of period four, which is equivalent to the start of period five.
+
+    Attributes:
+        amount: The cash payment made
+        d: A two-integer list whose elements represent the start and end
+            period for the Annuity
+    
+    See Also:
+        Gradient, Geometric: Modified types of Annuity
+        Perpetuity: An Annuity whose end period is infinity
+        Cashflow: Parent class
+    """
     def __init__(self, amount, d, title=None, tags=None):
         super().__init__(amount, title, tags)
-        self.d = parse_d(d)  # The start and end period of the annuity
+        self.d = tuple(parse_d(d))  # The start and end period of the annuity
         self.D = self.d[1] - self.d[0]  # The number of periods for the annuity
 
-    def __add__(self, other):
-        if not all([type(self) == Annuity, type(other) == Annuity]):
-            return NotImplemented
-        if self.d == other.d:
-            val = self.amount + other.amount
-            return Annuity(val, self.d, self.title, self.tags)
-        else:
-            return ValueError("Added annuities must have equal durations")
-
     def cashflow_at(self, ns):
-        cfs = []
+        """ See base class """
+        cashflows = list()
         for n in ns:
             if self.d[0] < n <= self.d[1]:
-                cfs.append(sp.Future(self.amount, n, self.title, self.tags))
+                cashflows.append(
+                    sp.Future(self.amount, n, self.title, self.tags))
             else:
-                cfs.append(NullCashflow())
-        return cfs[0] if len(cfs) == 1 else cfs
+                cashflows.append(NullCashflow())
+        return cashflows[0] if len(ns) == 1 else cfs
+
+    def to_pv(self, i):
+        """ See base class """
+        if i == 0:
+            present_value = self.amount * self.D
+            return sp.Present(present_value, self.title, self.tags)    
+        
+        uniform_present_factor = ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D)
+        present_worth_factor = (1 + i) ** -self.d[0]
+        present_value = self.amount * uniform_present_factor * present_worth_factor
+        return sp.Present(present_value, self.title, self.tags)
+
+    def to_fv(self, i, n):
+        """ See base class """
+        if i == 0:
+            fv = self.amount * self.D
+            return sp.Future(fv, n, self.title, self.tags)
+
+        uniform_present_factor = ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D)
+        future_worth_factor = (1 + i) ** (n - self.d[0])
+        future_value = self.amount * uniform_present_factor * future_worth_factor
+        return sp.Future(future_value, n, self.title, self.tags)
+
+    def to_av(self, i, d):
+        d = parse_d(d)
+        D = d[1] - d[0]
+        
+        uniform_present_factor = ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D)
+        future_worth_factor = (1 + i) ** (d[0] - self.d[0])
+        capital_recovery_factor = i * (1 + i) ** D / ((1 + i) ** D - 1) 
+        anmnuity_value = (
+                self.amount *
+                uniform_present_factor *
+                future_worth_factor *
+                capital_recovery_factor)
+        return Annuity(annuiy_value, d, self.title, self.tags)
 
     def __repr__(self, alt=None):
         info = alt or ['A', self.d]
         return super().__repr__(info)
 
-    def to_pv(self, i):
-        if i == 0:
-            pv = self.amount * self.D
-        else:
-            present_worth_factor = ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D)
-            pv = self.amount * present_worth_factor
-
-        if self.d[0] == 0:  # PV is correct
-            return sp.Present(pv, self.title, self.tags)
-        else:  # If our annuity begins in the future, v is a FV and must
-            # be converted to a PV.
-            return sp.Future(pv, self.d[0], self.title, self.tags).to_pv(i)
-
-    def to_fv(self, i, n):
-        if self.d[0] == 0:  # Use standard formulas
-            if self.d[1] == n:
-                fv = self.amount * ((1 + i) ** n - 1) / i
-                return sp.Future(fv, n, self.title, self.tags)
-            else:
-                return self.to_pv(i).to_fv(i, n)
-        else:  # Annuity is not ordinary; convert to "Future Present Value", -
-            # that is, the future value at the starting period of the annuity -
-            # then to Present Value, then to Future Value
-            fpv = self.amount * ((1 + i) ** self.dn - 1) / (i * (1 + i) ** self.dn)
-            return sp.Future(fpv, d[0], self.title, self.tags).to_pv(i).to_fv(i, n)
-
-    def to_av(self, i, d):
-        d = parse_d(d)
-        D = d[1] - d[0]
-
-        if d == self.d:  # The requested annuity is equivalent to this instance
-            return self
-        else:
-            return self.to_pv(i).to_av(i, d)
-
+    def __add__(self, other):
+        if not type(other) == Annuity):
+            return NotImplemented
+        if self.d != other.d:
+            return ValueError("Summed Annuities must have equal durations")
+        
+        val = self.amount + other.amount
+        return Annuity(val, self.d, self.title, self.tags)
 
 class Gradient(Annuity):
+    """ A recurring linearly-varying payment
+
+    Represents a payment recurring over several periods. Payments are made in
+    arrear - that is, at the end of a period. The cashflow recurs over the
+    duration specified by d. For example, a transfer in of amount 600 made
+    from period 1 to 5 with G=-300 can be represented by the following 
+    cashflow diagram:
+
+                    ^ 600 
+                    |     ^ 300      
+                    |     |     
+        0 --- 1 --- 2 --- 3 --- 4 --- 5 --- 6 --- 
+                                      |
+                                      v -300 
+
+    We note that the cashflow changed signs from periods 3 to 5! This is
+    perfectly legal, and the sign of any equivalent single payments is now
+    dependent on the interest rate applied to the conversion.
+    
+    Attributes:
+        amount: The cash payment made
+        G: The value by which the amount changes each period.
+        d: A two-integer list whose elements represent the start and end
+            period for the Annuity
+    
+    See Also:
+        Annuity: Parent class
+        Geometric: Another type of modified Annuity
+    """
     def __init__(self, amount, G, d, title=None, tags=None):
         super().__init__(amount, d, title, tags)
-        self.G = G
-
-    def __repr__(self):
-        info = ['G', self.G, self.d]
-        return super().__repr__(info)
+        self.G = float(G)
 
     def cashflow_at(self, ns):
         cfs = []
@@ -115,7 +168,10 @@ class Gradient(Annuity):
             return Annuity(A_eq, d, self.title, self.tags)
         else:
             return self.to_pv(i).to_av(i, d)
-
+    
+    def __repr__(self):
+        info = ['G', self.G, self.d]
+        return super().__repr__(info)
 
 class Geometric(Annuity):
     def __init__(self, amount, g, d, title=None, tags=None):

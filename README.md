@@ -6,7 +6,7 @@ A Python3 library for engineering economic analysis.
 ``` Python
 from PyEEA import Project, Present, Future, Annuity
 
-msp = Project("My Sample Project", 0.12)
+msp = Project("My Sample Project", interest=0.12)
 msp.add_cashflows([
     Present(-1000),
     Annuity(200, 5),
