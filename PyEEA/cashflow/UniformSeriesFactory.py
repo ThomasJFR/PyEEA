@@ -87,7 +87,7 @@ class Annuity(Cashflow):
         return super().__repr__(info)
 
     def __add__(self, other):
-        if not type(other) == Annuity):
+        if not type(other) == Annuity:  # Don't check for subclasses!
             return NotImplemented
         if self.d != other.d:
             return ValueError("Summed Annuities must have equal durations")

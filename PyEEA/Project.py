@@ -45,7 +45,7 @@ class Project:
 
     @property
     def title(self):
-        return self._title or f"Project with {len(self.get_cashflows)} cashflows"
+        return self._title or f"Project with {len(self.get_cashflows())} cashflows"
     
     def set_title(self, title):
         self._title = title

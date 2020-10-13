@@ -1,11 +1,11 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.cm import get_cmap
-from matplotlib.colors import Colormap
+from matplotlib.colors import ListedColormap
 from ..utilities import Scales, parse_d, get_final_period
 
 name = "tab20"
-def_cmap = get_cmap(name)  # type: matplotlib.colors.ListedColormap
+default_colormap = get_cmap(name)  # type: matplotlib.colors.ListedColormap
 
 def generate_cashflow_diagram(
         cashflows, d=None, net=False, scale=None, color=None, title=None, **kwargs):
@@ -33,7 +33,10 @@ def generate_cashflow_diagram(
     # Parse Args
     d = parse_d(d or get_final_period(cashflows, finite=True) or 5)
     net = bool(net)
-    color = (color.colors if isinstance(color, Colormap) else color) or def_cmap
+    if color:
+        color = color.colors if isinstance(color, ListedColormap) else color
+    else:
+        color = default_colormap.colors
     if scale:
         scale = (
             scale if isinstance(scale, Scales) else
