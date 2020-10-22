@@ -153,6 +153,12 @@ class Cashflow(ABC):
     def add_tags(self, tags):
         for tag in tags:
             self.add_tag(tag)
+
+    def show(self, **kwargs):
+        from ..output import generate_cashflow_diagram
+        from matplotlib.pyplot import show
+        generate_cashflow_diagram(self, **kwargs)
+        show()
     
     def __repr__(self, info):
         """ Returns an unambiguous string representation of the Cashflow
