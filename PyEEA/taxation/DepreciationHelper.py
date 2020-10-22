@@ -75,6 +75,12 @@ class Depreciation(ABC):
         """
         pass
 
+    def show(self):
+        from ..output import generate_cashflow_diagram
+        from matplotlib.pyplot import show
+        generate_cashflow_diagram(self.get_cashflows())
+        show()
+
     @classmethod
     def get_depreciation_name(cls):
         return cls.__name__

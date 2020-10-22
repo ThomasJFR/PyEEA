@@ -68,3 +68,4 @@ class TaxCashflow(Dynamic):
 
         taxed_amount = (taxable_sum - shielding_sum) * self._rate
         return taxed_amount
+
