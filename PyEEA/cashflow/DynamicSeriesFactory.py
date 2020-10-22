@@ -9,6 +9,12 @@ class Dynamic(Cashflow):
         self.d = parse_d(d)
         self.D = self.d[1] - self.d[0]
 
+    def __repr__(self):
+        valstr = "F"
+        infostr = ", ".join(self._amount_fun.__code__.co_varnames)
+        infostr = infostr.replace('\'', '')
+        return f"{valstr}({infostr})"
+
     def to_shorthand(self):
         # TODO New implementaton needed
         return "Dynamic Series"
@@ -28,3 +34,4 @@ class Dynamic(Cashflow):
 
     def to_av(self, i, d):
         return self.to_pv(i).to_av(i, d)
+
