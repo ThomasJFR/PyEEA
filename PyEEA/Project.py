@@ -284,12 +284,13 @@ class Project:
 
         return pd.DataFrame(str_cashflows, index=periods, columns=titles)
 
-    def to_cashflowdiagram(self, n=None, net=False, scale=None, size=None):
+    def to_cashflowdiagram(self, n=None, net=False, scale=None, color=None, size=None):
         fig, ax = generate_cashflow_diagram(
                 self.get_taxed_cashflows(),
                 n,
-                net,
-                scale,
+                net=net,
+                scale=scale,
+                color=color,
                 title=self.title)
         if size:
             fig.set_size_inches(size)
