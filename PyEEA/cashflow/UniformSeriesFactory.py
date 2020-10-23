@@ -75,12 +75,12 @@ class Annuity(Cashflow):
         uniform_present_factor = ((1 + i) ** self.D - 1) / (i * (1 + i) ** self.D)
         future_worth_factor = (1 + i) ** (d[0] - self.d[0])
         capital_recovery_factor = i * (1 + i) ** D / ((1 + i) ** D - 1) 
-        anmnuity_value = (
+        annuity_value = (
                 self.amount *
                 uniform_present_factor *
                 future_worth_factor *
                 capital_recovery_factor)
-        return Annuity(annuiy_value, d, self.title, self.tags)
+        return Annuity(annuity_value, d, self.title, self.tags)
 
     def __repr__(self, alt=None):
         info = alt or ['A', self.d]
